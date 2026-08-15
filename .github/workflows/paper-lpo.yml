@@ -1,0 +1,36 @@
+name: paper-lpo
+
+on:
+  push:
+    paths:
+      - 'papers/2026-lpo/**'
+      - '.github/workflows/paper-lpo.yml'
+  pull_request:
+    paths:
+      - 'papers/2026-lpo/**'
+      - '.github/workflows/paper-lpo.yml'
+  workflow_dispatch:
+  schedule:
+    - cron: '17 1 * * 1'
+
+permissions:
+  contents: read
+
+jobs:
+  reproduce-rq1:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Reproduce published RQ1 aggregates
+        run: bash papers/2026-lpo/reproduce.sh
+      - name: Show result
+        run: cat papers/2026-lpo/results/rq1-summary.txt
+      - name: Upload reproduction evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: lpo-rq1-reproduction
+          path: |
+            papers/2026-lpo/results/rq1-summary.txt
+            papers/2026-lpo/results/artifact-commit.txt
+          if-no-files-found: error
