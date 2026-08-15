@@ -1,0 +1,43 @@
+# research
+
+Reproducible paper-reading and experiment lab.
+
+Primary track: papers by Yongqiang Tian, starting from 2026 and prioritizing compiler / LLVM / testing / LLM-for-compilers work.
+
+## Contract for every paper
+
+Each paper directory should contain:
+
+- `README.md` — paper summary, hypotheses, experiment design, paper-vs-reproduction table, limitations, and improvement ideas.
+- `reproduce.sh` — one-command reproducible entry point.
+- `results/` — generated summaries/logs when appropriate.
+- GitHub Actions coverage — at minimum a deterministic smoke/reproduction lane; expensive live experiments are separated and explicitly gated.
+
+## Reproduction levels
+
+- **L0 — structural**: artifact/source availability and commands are verified.
+- **L1 — reported-results**: published artifact outputs are reprocessed to reproduce paper tables/numbers.
+- **L2 — live-minimal**: a small end-to-end experiment is actually rerun.
+- **L3 — live-full**: the main paper experiment is rerun at paper-like scale.
+- **L4 — extension**: an ablation, new baseline, new model/workload, or other improvement is evaluated.
+
+The repository should never call an L1 result a full reproduction.
+
+## Papers
+
+| Date added | Paper | Venue | Current level | CI |
+|---|---|---|---|---|
+| 2026-08-15 | [LPO: Discovering Missed Peephole Optimizations with Large Language Models](papers/2026-lpo/) | ASPLOS 2026 | L1 scaffold | `paper-lpo.yml` |
+
+## Daily workflow
+
+One paper per day:
+
+1. locate paper + official artifact;
+2. identify claims and RQs;
+3. design the smallest faithful reproduction;
+4. make it runnable in GitHub Actions when feasible;
+5. compare reproduced evidence with the paper;
+6. identify threats to validity;
+7. propose at least one meaningful extension;
+8. record what would be required to move up one reproduction level.
