@@ -1,0 +1,25 @@
+name: paper-proj
+
+on:
+  push:
+    paths:
+      - 'papers/2026-proj/**'
+      - '.github/workflows/paper-proj.yml'
+  pull_request:
+    paths:
+      - 'papers/2026-proj/**'
+      - '.github/workflows/paper-proj.yml'
+  workflow_dispatch:
+
+jobs:
+  deterministic-reproduction:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run claim audit and architecture smoke test
+        run: bash papers/2026-proj/reproduce.sh
+      - name: Upload report
+        uses: actions/upload-artifact@v4
+        with:
+          name: proj-reproduction-report
+          path: papers/2026-proj/results/report.md
