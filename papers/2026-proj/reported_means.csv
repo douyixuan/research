@@ -1,0 +1,4 @@
+suite,vulcan_tokens,lpr_tokens,creduce_tokens,proj_tokens,reported_improvement_pct
+C,195,181,135,82.2,39.0
+Rust,184,202,201,117.7,36.0
+JavaScript,38,41,43,23.3,38.9
