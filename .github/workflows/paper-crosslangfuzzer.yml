@@ -1,0 +1,59 @@
+name: paper-crosslangfuzzer
+
+on:
+  push:
+    paths:
+      - "papers/2026-crosslangfuzzer/**"
+      - ".github/workflows/paper-crosslangfuzzer.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  kt74109-live-reproduction:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Cache Kotlin compiler distributions
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/crosslangfuzzer-kotlin
+          key: crosslangfuzzer-kotlin-2.1.0-2.4.10-v1
+
+      - name: Reproduce KT-74109 and test current compiler drift
+        run: bash papers/2026-crosslangfuzzer/reproduce.sh
+
+      - name: Publish reproduction evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: crosslangfuzzer-kt74109-reproduction
+          path: papers/2026-crosslangfuzzer/results/
+          if-no-files-found: error
+
+  artifact-structure-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Pin and inspect official artifact
+        env:
+          CLF_COMMIT: d3ebc126aec6e31bfb561d5a672b3eecf53b15c6
+        run: |
+          git clone --filter=blob:none https://github.com/XYZboom/CrossLangFuzzer.git artifact
+          git -C artifact checkout "$CLF_COMMIT"
+          test -f artifact/README.md
+          test -f artifact/gradlew
+          test -d artifact/runners/kotlin-runner
+          test -d artifact/runners/scala-runner
+          test -d artifact/runners/groovy-runner
+          grep -q "CrossLangFuzzer" artifact/README.md
+          echo "official artifact commit: $CLF_COMMIT"
