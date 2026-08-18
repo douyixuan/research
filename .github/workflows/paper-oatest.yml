@@ -5,6 +5,10 @@ on:
     paths:
       - 'papers/2026-oatest/**'
       - '.github/workflows/paper-oatest.yml'
+  pull_request:
+    paths:
+      - 'papers/2026-oatest/**'
+      - '.github/workflows/paper-oatest.yml'
   workflow_dispatch:
 
 permissions:
