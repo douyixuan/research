@@ -1,6 +1,8 @@
 {
   "paper": "Optimization-Aware Test Generation for Deep Learning Compilers",
   "venue": "ICSE 2026",
+  "reproduction_level": "L1",
+  "reference_snapshot": "final ICSE paper + pinned official artifact",
   "final_claims": {
     "previously_unknown_bugs": 56,
     "confirmed_or_fixed": 42,
