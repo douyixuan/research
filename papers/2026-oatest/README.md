@@ -11,7 +11,7 @@ ICSE 2026 — Qingchao Shen, Zan Wang, Haoyang Ma, Yongqiang Tian, Lili Huang, Z
 
 **Current reproduction level: L1 — released-artifact claim reprocessing.**
 
-Today we reprocess the authors' released bug corpus and artifact structure, pin provenance, and run source syntax checks in GitHub Actions. This is **not** a fresh OATest fuzzing campaign and must not be described as L2/L3.
+We reprocess the authors' released bug corpus and artifact structure, pin provenance, and run source syntax checks in GitHub Actions. This is **not** a fresh OATest fuzzing campaign and must not be described as L2/L3.
 
 ## Core insight
 
@@ -37,27 +37,31 @@ compiler + crash / inconsistency oracle
 
 The key research idea is therefore not simply "generate more graphs"; it is **preserve a known optimization trigger while varying the surrounding context**. That changes the search distribution from generic model validity toward optimization-path diversity.
 
-## Paper claims we care about
+## Paper claims and L1 result
 
-| Claim | Paper result | This reproduction |
-|---|---:|---|
-| Previously unknown bugs | 56 | recomputed from released bug table in CI |
-| TVM / ONNXRuntime bugs | 40 / 16 | recomputed in CI |
-| Confirmed or fixed | 42 | recomputed in CI |
-| Fixed | 24 | recomputed in CI |
-| TVM optimizations targeted | 65 | released corpus directory audit |
-| ONNXRuntime optimizations targeted | 46 | released corpus directory audit |
-| Extracted patterns | 942 TVM / 2,116 ORT | recorded as paper claims; file count is audited but not equated with patterns |
+| Claim | Final ICSE result | Released-artifact audit |
+|---|---:|---:|
+| Previously unknown bugs | 56 | **56** |
+| TVM / ONNXRuntime bugs | 40 / 16 | **40 / 16** |
+| Confirmed or fixed | 42 | **42** |
+| Fixed / Confirmed / Awaiting | 24 / 18 / 14 | **24 / 18 / 14** |
+| Bug symptoms | — | **46 crash / 10 inconsistency** |
+| TVM optimizations targeted | 65 | **52 top-level artifact buckets**; not assumed 1:1 with passes |
+| ONNXRuntime optimizations targeted | 46 | **46 top-level artifact buckets** |
+| Extracted TVM patterns | 942 | **942 released files** |
+| Extracted ONNXRuntime patterns | 2,116 | **2,127 released files** (+11 snapshot/layout discrepancy) |
 | Full comparative fuzzing | 12 h × 5 repetitions per setting | **not rerun** |
 
-The published ICSE version reports 56 bugs and 42/24 confirmed/fixed. The older arXiv abstract currently shows 58/36, so the conference paper and released artifact are treated as the authoritative final claims here. This version drift is itself worth tracking in reproducibility work.
+The hard bug-accounting claims reproduce exactly. The corpus audit also exposed two structural facts that should not be hidden: the released TVM corpus has 52 top-level pattern buckets rather than 65 directories, and the ONNXRuntime corpus has 2,127 recursive files rather than the paper's 2,116 pattern count. These are treated as **artifact-layout/snapshot discrepancies**, not silently coerced into paper counts; a directory/file is not documented as a one-to-one encoding of a conceptual optimization/pattern.
+
+The published ICSE version reports 56 bugs and 42/24 confirmed/fixed. The older arXiv abstract currently shows 58/36, so the conference paper and released artifact are treated as the authoritative final claims here. This version drift is itself a reproducibility finding.
 
 ## What `reproduce.sh` actually proves
 
 1. pins and clones the official artifact;
 2. syntax-checks the released TVM/ORT Python sources without requiring historical compiler builds;
 3. parses the released bug table and independently recomputes bug/status/compiler counts;
-4. checks optimization-corpus structure;
+4. audits the released optimization/pattern corpus without assuming filesystem layout equals paper concepts;
 5. emits machine-readable `report.json`, human-readable `report.md`, and provenance.
 
 Run:
@@ -75,6 +79,7 @@ The main subjects are historical TVM commit `292ecfd` and ONNXRuntime commit `5c
 - We did not build the historical TVM or ONNXRuntime revisions.
 - We did not rerun graph synthesis or fuzzing, so no fresh bug-discovery evidence is claimed.
 - Released data can validate published accounting but cannot independently validate the generator's stochastic effectiveness.
+- Artifact filesystem counts are not guaranteed to match conceptual paper counts; the L1 audit records the observed deltas explicitly.
 - Compiler issue state alone is not reliable ground truth for whether a bug remains: TVM #17488 is still open while its fixing PR #17501 was merged in November 2024.
 - The arXiv abstract and final ICSE paper have different bug-count snapshots; reproducibility must pin paper/artifact versions, not just a title.
 
