@@ -1,0 +1,27 @@
+name: paper-oatest
+
+on:
+  push:
+    paths:
+      - 'papers/2026-oatest/**'
+      - '.github/workflows/paper-oatest.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  l1-released-artifact:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Reprocess official artifact
+        run: bash papers/2026-oatest/reproduce.sh
+      - name: Publish reproduction report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: oatest-l1-report
+          path: papers/2026-oatest/results/
+          if-no-files-found: warn
