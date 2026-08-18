@@ -1,0 +1,24 @@
+{
+  "paper": "Optimization-Aware Test Generation for Deep Learning Compilers",
+  "venue": "ICSE 2026",
+  "final_claims": {
+    "previously_unknown_bugs": 56,
+    "confirmed_or_fixed": 42,
+    "fixed": 24,
+    "tvm_bugs": 40,
+    "onnxruntime_bugs": 16,
+    "tvm_optimizations": 65,
+    "onnxruntime_optimizations": 46,
+    "tvm_patterns": 942,
+    "onnxruntime_patterns": 2116
+  },
+  "subjects": {
+    "tvm": "292ecfd",
+    "onnxruntime": "5c1b7cc"
+  },
+  "artifact": {
+    "repository": "https://github.com/ShenQingchao/OATest",
+    "commit": "20d7464201f35c0552777cf7de4d696cb7b1ecd1"
+  },
+  "note": "The older arXiv abstract reports a different bug-count snapshot (58 / 36); final ICSE paper and released artifact are the pinned reference for this reproduction."
+}
