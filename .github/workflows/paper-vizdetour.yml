@@ -5,6 +5,10 @@ on:
     paths:
       - "papers/2026-vizdetour/**"
       - ".github/workflows/paper-vizdetour.yml"
+  pull_request:
+    paths:
+      - "papers/2026-vizdetour/**"
+      - ".github/workflows/paper-vizdetour.yml"
   workflow_dispatch:
 
 jobs:
