@@ -1,0 +1,61 @@
+name: paper-vizdetour
+
+on:
+  push:
+    paths:
+      - "papers/2026-vizdetour/**"
+      - ".github/workflows/paper-vizdetour.yml"
+  workflow_dispatch:
+
+jobs:
+  artifact-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Pin artifact candidate
+        run: |
+          git clone --quiet https://github.com/smith2936/vizdetour.git /tmp/vizdetour-artifact
+          git -C /tmp/vizdetour-artifact checkout --quiet d2b22e33b94eaff06b2116f31ddeea21bb0e6b91
+      - name: Recompute released artifact evidence
+        run: |
+          python papers/2026-vizdetour/audit_artifact.py \
+            /tmp/vizdetour-artifact/dataviz-bugs-detected.csv \
+            --out papers/2026-vizdetour/results/artifact-audit.json
+      - name: Upload artifact audit
+        uses: actions/upload-artifact@v4
+        with:
+          name: vizdetour-artifact-audit
+          path: papers/2026-vizdetour/results/artifact-audit.json
+
+  live-matplotlib:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        matplotlib: ["3.10.8", "3.11.1"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Install subject and oracle dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install "matplotlib==${{ matrix.matplotlib }}" numpy pillow
+      - name: Replay endpoint-preserving case
+        shell: bash
+        run: |
+          out="papers/2026-vizdetour/results/matplotlib-${{ matrix.matplotlib }}"
+          if [[ "${{ matrix.matplotlib }}" == "3.10.8" ]]; then
+            python papers/2026-vizdetour/reproduce.py --out "$out" --expect-detected
+          else
+            python papers/2026-vizdetour/reproduce.py --out "$out"
+          fi
+      - name: Upload live reproduction evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: vizdetour-matplotlib-${{ matrix.matplotlib }}
+          path: papers/2026-vizdetour/results/matplotlib-${{ matrix.matplotlib }}/
