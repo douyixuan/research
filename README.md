@@ -32,6 +32,7 @@ The repository should never call an L1 result a full reproduction.
 | 2026-08-17 | [CrossLangFuzzer: Differential Testing of Cross-Language JVM Compilers](papers/2026-crosslangfuzzer/) | arXiv 2026 preprint | L2 scoped live bug reproduction | `paper-crosslangfuzzer.yml` ✅ |
 | 2026-08-18 | [OATest: Optimization-Aware Test Generation for Deep Learning Compilers](papers/2026-oatest/) | ICSE 2026 | L1 | `paper-oatest.yml` ✅ |
 | 2026-08-19 | [VIZDETOUR: Detecting Rendering Bugs in Imperative Data Visualization Libraries via Equivalent Mutations](papers/2026-vizdetour/) | arXiv 2026 preprint | L1 + scoped L2 | `paper-vizdetour.yml` ✅ |
+| 2026-08-20 | [On the Feasibility of Deduplicating Compiler Bugs with Bisection (BugLens)](papers/2026-buglens/) | ISSTA 2026 | L1 partial + scoped L2 | `paper-buglens.yml` ⏳ |
 
 ## Daily workflow
 
