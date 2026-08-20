@@ -1,0 +1,29 @@
+name: paper-buglens
+
+on:
+  push:
+    paths:
+      - "papers/2026-buglens/**"
+      - ".github/workflows/paper-buglens.yml"
+  pull_request:
+    paths:
+      - "papers/2026-buglens/**"
+      - ".github/workflows/paper-buglens.yml"
+  workflow_dispatch:
+
+jobs:
+  l1-plus-scoped-l2:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: Recompute released results and run fresh bisection smoke
+        run: bash papers/2026-buglens/reproduce.sh
+      - name: Publish reproduction evidence
+        uses: actions/upload-artifact@v6
+        with:
+          name: buglens-reproduction-evidence
+          path: papers/2026-buglens/results/
