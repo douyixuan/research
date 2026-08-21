@@ -1,0 +1,36 @@
+name: paper-erwin
+
+on:
+  push:
+    paths:
+      - 'papers/2026-erwin/**'
+      - '.github/workflows/paper-erwin.yml'
+  workflow_dispatch:
+
+jobs:
+  live-minimal:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '20'
+
+      - name: Install system dependency
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y graphviz
+          dot -V
+
+      - name: Run Erwin scoped L2 reproduction
+        run: bash papers/2026-erwin/reproduce.sh
+
+      - name: Publish reproduction report
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: erwin-reproduction-report
+          path: papers/2026-erwin/results/runtime
+          if-no-files-found: warn
