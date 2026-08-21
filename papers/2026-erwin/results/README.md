@@ -5,3 +5,5 @@
 Expected files include generated Solidity programs for `type`, `loc`, and `scope` bounded-exhaustive lanes, generator logs, compile-failure logs, tool versions, `summary.json`, and `summary.md`.
 
 Generated runtime output is intentionally not committed because Erwin's released CLI is stochastic; the CI artifact is the evidence for each run.
+
+Pull requests that touch this paper also execute the same live-minimal reproduction, so changes can be validated before merging.
