@@ -5,6 +5,10 @@ on:
     paths:
       - 'papers/2026-erwin/**'
       - '.github/workflows/paper-erwin.yml'
+  pull_request:
+    paths:
+      - 'papers/2026-erwin/**'
+      - '.github/workflows/paper-erwin.yml'
   workflow_dispatch:
 
 jobs:
