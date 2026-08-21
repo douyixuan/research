@@ -33,7 +33,7 @@ The repository should never call an L1 result a full reproduction.
 | 2026-08-18 | [OATest: Optimization-Aware Test Generation for Deep Learning Compilers](papers/2026-oatest/) | ICSE 2026 | L1 | `paper-oatest.yml` ✅ |
 | 2026-08-19 | [VIZDETOUR: Detecting Rendering Bugs in Imperative Data Visualization Libraries via Equivalent Mutations](papers/2026-vizdetour/) | arXiv 2026 preprint | L1 + scoped L2 | `paper-vizdetour.yml` ✅ |
 | 2026-08-20 | [On the Feasibility of Deduplicating Compiler Bugs with Bisection (BugLens)](papers/2026-buglens/) | ISSTA 2026 | L1 partial + scoped L2 | `paper-buglens.yml` ✅ |
-| 2026-08-21 | [Bounded Exhaustive Random Program Generation for Testing Solidity Compilers (Erwin)](papers/2026-erwin/) | ICSE 2026 | scoped L2 live-minimal | `paper-erwin.yml` |
+| 2026-08-21 | [Bounded Exhaustive Random Program Generation for Testing Solidity Compilers (Erwin)](papers/2026-erwin/) | ICSE 2026 | scoped L2 live-minimal | `paper-erwin.yml` ✅ |
 
 ## Daily workflow
 
