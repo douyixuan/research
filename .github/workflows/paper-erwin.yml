@@ -31,10 +31,19 @@ jobs:
       - name: Run Erwin scoped L2 reproduction
         run: bash papers/2026-erwin/reproduce.sh
 
+      - name: Pack reproduction report
+        if: always()
+        run: |
+          if [ -d papers/2026-erwin/results/runtime ]; then
+            tar -C papers/2026-erwin/results \
+              -czf papers/2026-erwin/results/erwin-reproduction-report.tar.gz \
+              runtime
+          fi
+
       - name: Publish reproduction report
         if: always()
         uses: actions/upload-artifact@v6
         with:
           name: erwin-reproduction-report
-          path: papers/2026-erwin/results/runtime
+          path: papers/2026-erwin/results/erwin-reproduction-report.tar.gz
           if-no-files-found: warn

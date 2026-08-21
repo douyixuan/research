@@ -5,12 +5,14 @@ HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 WORK="$HERE/.work"
 RESULTS="$HERE/results"
 ERWIN="$WORK/Erwin"
-PIN="00ed69597b8cfcd0dfff15e86bc22b0ba319134a"
+# Parent of the upstream "publish 1.3.2" commit. package.json at this
+# revision is exactly 1.3.1, the implementation version named by the paper.
+PIN="c4f99a37d3f22cd6bd41a531a59c0e64ab39a3aa"
 
 rm -rf "$WORK" "$RESULTS/runtime"
 mkdir -p "$WORK" "$RESULTS/runtime"
 
-echo "[1/5] Clone and pin Erwin"
+echo "[1/5] Clone and pin Erwin 1.3.1"
 git clone --quiet https://github.com/haoyang9804/Erwin.git "$ERWIN"
 git -C "$ERWIN" checkout --quiet "$PIN"
 
@@ -30,9 +32,9 @@ for mode in type loc scope; do
   out="$RESULTS/runtime/generated-$mode"
   mkdir -p "$out"
   set +e
-  timeout 180 node dist/index.js generate \
+  timeout 90 node dist/index.js generate \
     -m "$mode" \
-    -max 20 \
+    -max 8 \
     --generation_rounds 1 \
     --out_dir "$out" \
     --refresh_folder \
@@ -44,6 +46,12 @@ for mode in type loc scope; do
     echo "Erwin generation failed for mode=$mode (exit=$rc)" >&2
     tail -100 "$RESULTS/runtime/generate-$mode.log" >&2 || true
     exit "$rc"
+  fi
+  count=$(find "$out" -type f -name '*.sol' | wc -l)
+  if [[ "$count" -eq 0 ]]; then
+    echo "Erwin produced no Solidity programs for mode=$mode (exit=$rc)" >&2
+    tail -100 "$RESULTS/runtime/generate-$mode.log" >&2 || true
+    exit 1
   fi
 done
 
@@ -69,6 +77,11 @@ done < <(find "$RESULTS/runtime" -type f -name '*.sol' -print0 | sort -z)
 
 if [[ "$TOTAL" -eq 0 ]]; then
   echo "Erwin produced no Solidity programs" >&2
+  exit 1
+fi
+if [[ "$PASS" -eq 0 ]]; then
+  echo "None of the generated programs compiled with solcjs 0.8.20" >&2
+  cat "$RESULTS/runtime/compile-failures.txt" >&2 || true
   exit 1
 fi
 
