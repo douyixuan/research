@@ -1,0 +1,40 @@
+name: paper-scitix
+
+on:
+  push:
+    paths:
+      - 'papers/2026-scitix/**'
+      - '.github/workflows/paper-scitix.yml'
+  pull_request:
+    paths:
+      - 'papers/2026-scitix/**'
+      - '.github/workflows/paper-scitix.yml'
+  workflow_dispatch:
+
+jobs:
+  scoped-l2-mechanism:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+
+      - name: Run Scitix scoped reproduction
+        run: bash papers/2026-scitix/reproduce.sh
+
+      - name: Show compact result
+        if: always()
+        run: |
+          test -f papers/2026-scitix/results/summary.json
+          cat papers/2026-scitix/results/summary.json
+
+      - name: Publish reproduction report
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: scitix-reproduction-report
+          path: papers/2026-scitix/results/
+          if-no-files-found: error
