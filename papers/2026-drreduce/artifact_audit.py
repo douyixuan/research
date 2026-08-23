@@ -7,6 +7,7 @@ from pathlib import Path
 RATIO_RE = re.compile(r"Reduction ratio is\s+(\d+)/(\d+)=")
 TIME_RE = re.compile(r"Elapsed time is\s+(\d+)\s+seconds")
 QUERY_RE = re.compile(r"Test script execution count:\s+(\d+)")
+PAPER_NEW_JDK = ["JDK-8271954", "JDK-8272562", "JDK-8293941", "JDK-8331717"]
 
 
 def parse_result(path: Path):
@@ -56,15 +57,24 @@ def main():
 
     counts = {}
     bug_names = []
+    family_names = {}
     for family in ("clang", "gcc", "java"):
         d = root / family
         names = sorted(p.name for p in d.iterdir() if p.is_dir())
+        family_names[family] = names
         counts[family] = len(names)
         bug_names.extend(f"{family}/{n}" for n in names)
 
-    total = sum(counts.values())
-    if total != 28:
-        raise SystemExit(f"expected 28 evaluation programs, found {total}: {counts}")
+    released_total = sum(counts.values())
+    # Paper Table 3 says 28 = 16 C + 12 Java, including four newly collected
+    # JDK bugs. The pinned public data commit contains all 16 C cases but only
+    # eight Java cases, i.e. 24 total. Treat this as a reproducibility gap rather
+    # than pretending the release is complete.
+    if counts != {"clang": 6, "gcc": 10, "java": 8}:
+        raise SystemExit(f"unexpected released corpus shape: {counts}")
+    missing_new_jdk = [name for name in PAPER_NEW_JDK if name not in family_names["java"]]
+    if missing_new_jdk != PAPER_NEW_JDK:
+        raise SystemExit(f"unexpected new-JDK availability: missing={missing_new_jdk}")
 
     case = root / "gcc" / "gcc-65383"
     paper_perses = first_existing(case, [
@@ -107,9 +117,15 @@ def main():
     summary = {
         "artifact": {
             "root": str(root),
-            "evaluation_programs": total,
+            "paper_expected_programs": 28,
+            "released_evaluation_programs": released_total,
             "counts": counts,
             "programs": bug_names,
+            "missing_paper_programs": [f"java/{name}" for name in missing_new_jdk],
+            "coverage_note": (
+                "Paper Table 3 has 12 Java cases; pinned public data has 8. "
+                "The four newly collected JDK cases are absent from java/."
+            ),
         },
         "gcc-65383-paper-era": {
             "perses": paper_perses,
