@@ -43,10 +43,9 @@ NAIVE_DELETE = ORIGINAL.replace(
 )
 
 # DRReduce-style dependency reconstruction: after deleting the provider, rewire
-# its surviving use to a typed/default placeholder. For int, 0 is sufficient for
-# this property checker because the bug-triggering behavior does not depend on
-# the noise value.
-RECONSTRUCTED = NAIVE_DELETE.replace("noise_value()", "0")
+# its surviving use to the paper's C integer default (1). The bug-triggering
+# behavior does not depend on the noise value.
+RECONSTRUCTED = NAIVE_DELETE.replace("noise_value()", "1")
 
 TOKEN_RE = re.compile(r"[A-Za-z_]\w*|\d+|==|!=|<=|>=|&&|\|\||[-+*/%<>{}();,=]")
 
@@ -101,12 +100,13 @@ def main():
         "level": "scoped L2 mechanism reproduction",
         "not_authors_implementation": True,
         "property": "compiled executable prints BUG",
+        "paper_style_c_integer_default": 1,
         "original": original,
         "syntax_only_provider_deletion": naive,
         "dependency_reconstructed_deletion": reconstructed,
         "observation": (
             "Deleting the provider alone is rejected because the intermediate program is invalid; "
-            "rewiring the surviving use to a default value restores compilability while preserving the property."
+            "rewiring the surviving use to the paper-style integer default restores compilability while preserving the property."
         ),
     }
     out = Path(__file__).resolve().parent / "results" / "mechanism.json"
