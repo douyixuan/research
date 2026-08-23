@@ -1,0 +1,46 @@
+name: paper-drreduce
+
+on:
+  push:
+    paths:
+      - 'papers/2026-drreduce/**'
+      - '.github/workflows/paper-drreduce.yml'
+  pull_request:
+    paths:
+      - 'papers/2026-drreduce/**'
+      - '.github/workflows/paper-drreduce.yml'
+  workflow_dispatch:
+
+jobs:
+  scoped-l1-l2:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+
+      - name: Record toolchain
+        run: |
+          python3 --version
+          gcc --version | head -1
+          git --version
+
+      - name: Reprocess official data and run live mechanism test
+        run: bash papers/2026-drreduce/reproduce.sh
+
+      - name: Show compact result
+        if: always()
+        run: |
+          test -f papers/2026-drreduce/results/summary.json
+          cat papers/2026-drreduce/results/summary.json
+
+      - name: Publish reproduction report
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: drreduce-reproduction-report
+          path: papers/2026-drreduce/results/
+          if-no-files-found: error
