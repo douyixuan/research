@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Recompute the released Siemens DDMT/ddmin summary rows.
 
-This intentionally uses only the Python standard library.  The upstream files
+This intentionally uses only the Python standard library. The upstream files
 store one record as:
 
     versionN
@@ -10,6 +10,13 @@ store one record as:
 
 Table VI compares only program/input pairs for which both approaches apply, so
 we join records by (faulty-version, test-case) before computing means.
+
+A reproducibility detail surfaced while checking the artifact: Table VI's query
+column is displayed by truncating the arithmetic mean to an integer, whereas
+size/time are rounded to two decimals. For example, the released printtokens
+ddmin data yield 30.7757 queries, displayed as 30 in the paper. We validate the
+published table using that observed display convention and retain raw means in
+the JSON evidence.
 """
 
 from __future__ import annotations
@@ -71,12 +78,14 @@ def means(records: dict[tuple[str, str], tuple[float, float, float]], keys: set[
     return [statistics.fmean(records[k][i] for k in keys) for i in range(3)]
 
 
-def close_enough(actual: list[float], expected: list[float]) -> tuple[bool, list[float]]:
-    # Paper values are rounded to 2 decimals for size/time and to integers for
-    # query count.  These tolerances are stricter than the displayed precision.
-    tolerances = [0.011, 0.51, 0.011]
-    errors = [abs(a - e) for a, e in zip(actual, expected)]
-    return all(err <= tol for err, tol in zip(errors, tolerances)), errors
+def as_displayed(actual: list[float]) -> list[float]:
+    # Reverse-engineered from all released rows that are available: query means
+    # are truncated, not rounded. Size/time use ordinary 2-decimal rounding.
+    return [round(actual[0], 2), float(int(actual[1])), round(actual[2], 2)]
+
+
+def matches_table(actual: list[float], expected: list[float]) -> bool:
+    return as_displayed(actual) == expected
 
 
 def main() -> int:
@@ -88,6 +97,7 @@ def main() -> int:
     root = args.siemens_dir
     report: dict[str, object] = {
         "scope": "released Siemens summaries, best-MR rows available in artifact",
+        "display_convention": "size/time rounded to 2 decimals; query mean truncated to integer",
         "subjects": {},
         "artifact_gaps": [],
     }
@@ -115,26 +125,27 @@ def main() -> int:
 
         dd_mean = means(dd, common)
         mr_mean = means(mr, common)
-        dd_ok, dd_err = close_enough(dd_mean, cfg["paper"]["dd"])
-        mr_ok, mr_err = close_enough(mr_mean, cfg["paper"]["mr"])
+        dd_ok = matches_table(dd_mean, cfg["paper"]["dd"])
+        mr_ok = matches_table(mr_mean, cfg["paper"]["mr"])
         if not dd_ok:
-            failures.append(f"{subject}: ddmin means differ from Table VI: {dd_mean}")
+            failures.append(
+                f"{subject}: ddmin displayed metrics differ: {as_displayed(dd_mean)} vs {cfg['paper']['dd']}"
+            )
         if not mr_ok:
-            failures.append(f"{subject}: DDMT means differ from Table VI: {mr_mean}")
+            failures.append(
+                f"{subject}: DDMT displayed metrics differ: {as_displayed(mr_mean)} vs {cfg['paper']['mr']}"
+            )
 
         report["subjects"][subject] = {
             "best_mr": cfg["mr_name"],
             "matched_pairs": len(common),
             "released_records": {"ddmin": len(dd), "ddmt": len(mr)},
-            "recomputed": {
+            "raw_means": {
                 "ddmin": {"size": dd_mean[0], "queries": dd_mean[1], "seconds": dd_mean[2]},
                 "ddmt": {"size": mr_mean[0], "queries": mr_mean[1], "seconds": mr_mean[2]},
             },
-            "paper": {
-                "ddmin": {"size": cfg["paper"]["dd"][0], "queries": cfg["paper"]["dd"][1], "seconds": cfg["paper"]["dd"][2]},
-                "ddmt": {"size": cfg["paper"]["mr"][0], "queries": cfg["paper"]["mr"][1], "seconds": cfg["paper"]["mr"][2]},
-            },
-            "absolute_error": {"ddmin": dd_err, "ddmt": mr_err},
+            "recomputed_display": {"ddmin": as_displayed(dd_mean), "ddmt": as_displayed(mr_mean)},
+            "paper_display": {"ddmin": cfg["paper"]["dd"], "ddmt": cfg["paper"]["mr"]},
             "matches_displayed_table": dd_ok and mr_ok,
         }
 
