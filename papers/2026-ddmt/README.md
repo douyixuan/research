@@ -45,6 +45,8 @@ The compiler experiment reports an average of 369 vs 368 tokens and 4666 vs 4623
 
 `recompute_siemens.py` reparses the official released Siemens result summaries and joins `ddmin` and DDMT records by `(faulty version, test case)` before computing means. It validates the paper's Table VI values for every best-MR row that is actually represented in the public artifact.
 
+The CI run exposed a reproducibility detail that is not obvious from the table: the released raw ddmin query means are `30.7757` for printtokens and `21.5774` for printtokens2, while Table VI displays `30` and `21`. Across the released rows, the published values are reproduced by **truncating query-count means to integers**, while size and time are rounded to two decimals. The reprocessor preserves both raw means and the observed display convention in its JSON evidence.
+
 The artifact audit is deliberately part of the result: the paper identifies **MR3 as the best MR for `replace`**, but the released `benchmarks/Siemens/` directory contains `replace-MR1`, `replace-MR2`, and `replace-dd` summaries, with no `replace-MR3` summary. Therefore this repository calls the result **scoped L1**, not full L1.
 
 ### L2 — fresh mechanism-level end-to-end run (scoped)
@@ -68,7 +70,7 @@ This validates the algorithmic mechanism, not the paper's Siemens/Perses impleme
 bash papers/2026-ddmt/reproduce.sh
 ```
 
-Generated evidence is written to `papers/2026-ddmt/results/` and uploaded by GitHub Actions.
+Generated evidence is written to `papers/2026-ddmt/results/` and uploaded by GitHub Actions. The PR validation run is expected to pass both the scoped L1 reprocessor and scoped L2 mechanism test before merge.
 
 ## Threats and limitations
 
