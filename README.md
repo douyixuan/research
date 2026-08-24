@@ -36,6 +36,7 @@ The repository should never call an L1 result a full reproduction.
 | 2026-08-21 | [Bounded Exhaustive Random Program Generation for Testing Solidity Compilers (Erwin)](papers/2026-erwin/) | ICSE 2026 | scoped L2 live-minimal | `paper-erwin.yml` ✅ |
 | 2026-08-22 | [Scitix: Scalable Constraint-Based Type Inference for Code Snippets with Missing Types](papers/2026-scitix/) | ISSTA 2026 | scoped L2 mechanism model + L0 artifact probe | `paper-scitix.yml` ✅ |
 | 2026-08-23 | [DRReduce: Enhancing Syntax-Guided Program Reduction with Dependency Reconstruction](papers/2026-drreduce/) | arXiv 2026 preprint | scoped L1 + scoped L2 mechanism | `paper-drreduce.yml` ✅ |
+| 2026-08-24 | [DDMT: Delta Debugging in the Absence of Test Oracles Through Metamorphic Testing](papers/2026-ddmt/) | arXiv 2026 preprint | scoped L1 + scoped L2 mechanism | `paper-ddmt.yml` ✅ |
 
 ## Daily workflow
 
