@@ -1,0 +1,35 @@
+name: paper-lpr-plus
+
+on:
+  pull_request:
+    paths:
+      - 'papers/2026-lpr-plus/**'
+      - '.github/workflows/paper-lpr-plus.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'papers/2026-lpr-plus/**'
+      - '.github/workflows/paper-lpr-plus.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  scoped-l2:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout research repo
+        uses: actions/checkout@v6
+
+      - name: Run LPR+ source audit and live-minimal reproduction
+        run: bash papers/2026-lpr-plus/reproduce.sh
+
+      - name: Upload reproduction evidence
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: lpr-plus-reproduction-report
+          path: papers/2026-lpr-plus/results/
+          if-no-files-found: error
