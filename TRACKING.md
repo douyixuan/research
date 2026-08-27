@@ -1,13 +1,13 @@
 # Yongqiang Tian paper tracker
 
-Last public-source sweep: **2026-08-25**.
+Last public-source sweep: **2026-08-26**.
 
 This file separates the discovery queue from completed reproduction directories. It intentionally includes preprints and tool demonstrations that may not yet be prominent in Scholar/DBLP so they do not get lost between daily runs.
 
 | Paper | Public status | Reproduction status |
 |---|---|---|
 | LPO: Discovering Missed Peephole Optimizations with Large Language Models | ASPLOS 2026 | ✅ `papers/2026-lpo/` |
-| Unmasking the Type Inference Capabilities of LLMs for Java Code Snippets | TOSEM 2026 | ⏳ pending |
+| Unmasking the Type Inference Capabilities of LLMs for Java Code Snippets | TOSEM 2026 | ✅ `papers/2026-thaliatype/` — L1 partial |
 | Optimization-Aware Test Generation for Deep Learning Compilers | ICSE 2026 | ✅ `papers/2026-oatest/` |
 | Bounded Exhaustive Random Program Generation for Testing Solidity Compilers | ICSE 2026 | ✅ `papers/2026-erwin/` |
 | On the Feasibility of Deduplicating Compiler Bugs with Bisection | ISSTA 2026 | ✅ `papers/2026-buglens/` |
@@ -30,16 +30,15 @@ This file separates the discovery queue from completed reproduction directories.
 - arXiv searches for newly indexed preprints
 - conference publication pages and official artifacts/GitHub repositories
 
-## Discovery note (2026-08-25)
+## Discovery note (2026-08-26)
 
-The refreshed author publication page exposed three 2026 SPLASH/ISSTA tool demonstrations that the tracker had missed: **RepoTrace**, **DebugTracker**, and **LPR+**. CrossLangFuzzer is also now explicitly listed as a tool demonstration in addition to its arXiv preprint. LPR+ was selected immediately because it is both new 2026 work and directly relevant to LLM-aided program reduction.
+No newer compiler/testing/program-reduction preprint dated after the already tracked July 2026 work was found in today's public-source sweep. The highest-priority pending compiler/code-reasoning-adjacent 2026 paper was therefore **Unmasking the Type Inference Capabilities of LLMs for Java Code Snippets** (TOSEM 2026), which has now been added as an L1-partial reproduction.
 
-No newer compiler/testing/program-reduction preprint dated after the already tracked July work was found in today's public-source sweep.
+The official `uw-pluverse/thalia-type` artifact is public and includes the benchmark data, transformations, saved SnR/Llama/GPT outputs and upstream metric implementation. Reprocessing is intentionally partial because the current public artifact snapshot does not expose the StarCoder2 result directories needed to recompute the two StarCoder2 Figure 7 cells.
 
 ## Next queue
 
-1. **Unmasking the Type Inference Capabilities of LLMs for Java Code Snippets** — 2026 TOSEM and compiler/code-reasoning adjacent; natural follow-up to Scitix.
-2. **RepoTrace** — new 2026 tool demo; useful for evidence provenance in GitHub-based empirical research.
-3. **DebugTracker** — new 2026 tool demo; process-evidence tooling.
-4. **TEMPLATEFUZZ** — 2026 testing work, but lower priority for the compiler-focused track.
-5. **Enhancing Differential Testing with LLMs for Testing Deep Learning Libraries** — DBLP publication-year drift remains recorded; reproduce after higher-priority 2026 queue.
+1. **RepoTrace** — new 2026 tool demo; useful for evidence provenance in GitHub-based empirical research.
+2. **DebugTracker** — new 2026 tool demo; process-evidence tooling.
+3. **TEMPLATEFUZZ** — 2026 testing work, but lower priority for the compiler-focused track.
+4. **Enhancing Differential Testing with LLMs for Testing Deep Learning Libraries** — DBLP publication-year drift remains recorded; reproduce after higher-priority 2026 queue.

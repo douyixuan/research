@@ -1,0 +1,36 @@
+name: paper-thaliatype
+
+on:
+  push:
+    paths:
+      - 'papers/2026-thaliatype/**'
+      - '.github/workflows/paper-thaliatype.yml'
+  pull_request:
+    paths:
+      - 'papers/2026-thaliatype/**'
+      - '.github/workflows/paper-thaliatype.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  l1-released-results:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          cache-dependency-path: 'papers/2026-thaliatype/reproduce.sh'
+      - name: Recompute Figure 7 released-result cells
+        run: bash papers/2026-thaliatype/reproduce.sh
+      - name: Upload reproduction evidence
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: thaliatype-reproduction-report
+          path: papers/2026-thaliatype/results/
+          if-no-files-found: error
