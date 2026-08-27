@@ -38,7 +38,8 @@ The repository should never call an L1 result a full reproduction.
 | 2026-08-23 | [DRReduce: Enhancing Syntax-Guided Program Reduction with Dependency Reconstruction](papers/2026-drreduce/) | arXiv 2026 preprint | scoped L1 + scoped L2 mechanism | `paper-drreduce.yml` ✅ |
 | 2026-08-24 | [DDMT: Delta Debugging in the Absence of Test Oracles Through Metamorphic Testing](papers/2026-ddmt/) | arXiv 2026 preprint | scoped L1 + scoped L2 mechanism | `paper-ddmt.yml` ✅ |
 | 2026-08-25 | [LPR+: Diverse Transformations for LLM-Aided Program Reduction](papers/2026-lpr-plus/) | SPLASH/ISSTA 2026 Tool Demo | L0 + scoped L2 live-minimal | `paper-lpr-plus.yml` |
-| 2026-08-26 | [Unmasking the Type Inference Capabilities of LLMs for Java Code Snippets](papers/2026-thaliatype/) | ACM TOSEM 2026 | L1 partial | `paper-thaliatype.yml` |
+| 2026-08-26 | [Unmasking the Type Inference Capabilities of LLMs for Java Code Snippets](papers/2026-thaliatype/) | ACM TOSEM 2026 | L1 partial | `paper-thaliatype.yml` ✅ |
+| 2026-08-27 | [RepoTrace: Browser-Assisted Evidence Collection for GitHub Research Datasets](papers/2026-repotrace/) | SPLASH/ISSTA 2026 Tool Demo | L0 artifact audit + scoped L2 | `paper-repotrace.yml` |
 
 ## Daily workflow
 

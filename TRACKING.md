@@ -1,6 +1,6 @@
 # Yongqiang Tian paper tracker
 
-Last public-source sweep: **2026-08-26**.
+Last public-source sweep: **2026-08-27**.
 
 This file separates the discovery queue from completed reproduction directories. It intentionally includes preprints and tool demonstrations that may not yet be prominent in Scholar/DBLP so they do not get lost between daily runs.
 
@@ -12,7 +12,7 @@ This file separates the discovery queue from completed reproduction directories.
 | Bounded Exhaustive Random Program Generation for Testing Solidity Compilers | ICSE 2026 | ✅ `papers/2026-erwin/` |
 | On the Feasibility of Deduplicating Compiler Bugs with Bisection | ISSTA 2026 | ✅ `papers/2026-buglens/` |
 | Scitix: Scalable Constraint-Based Type Inference for Code Snippets with Missing Types | ISSTA 2026 | ✅ `papers/2026-scitix/` |
-| RepoTrace: Browser-Assisted Evidence Collection for GitHub Research Datasets | SPLASH/ISSTA 2026 Tool Demo | ⏳ pending |
+| RepoTrace: Browser-Assisted Evidence Collection for GitHub Research Datasets | SPLASH/ISSTA 2026 Tool Demo | ✅ `papers/2026-repotrace/` — L0 artifact audit + scoped L2 |
 | DebugTracker: Lightweight Process Evidence for Classroom Debugging | SPLASH/ISSTA 2026 Tool Demo | ⏳ pending |
 | LPR+: Diverse Transformations for LLM-Aided Program Reduction | SPLASH/ISSTA 2026 Tool Demo | ✅ `papers/2026-lpr-plus/` — L0 + scoped L2 |
 | TEMPLATEFUZZ: Fine-Grained Chat Template Fuzzing for Jailbreaking and Red Teaming LLMs | arXiv 2604.12232, 2026-04-14 | ⏳ pending |
@@ -30,15 +30,14 @@ This file separates the discovery queue from completed reproduction directories.
 - arXiv searches for newly indexed preprints
 - conference publication pages and official artifacts/GitHub repositories
 
-## Discovery note (2026-08-26)
+## Discovery note (2026-08-27)
 
-No newer compiler/testing/program-reduction preprint dated after the already tracked July 2026 work was found in today's public-source sweep. The highest-priority pending compiler/code-reasoning-adjacent 2026 paper was therefore **Unmasking the Type Inference Capabilities of LLMs for Java Code Snippets** (TOSEM 2026), which has now been added as an L1-partial reproduction.
+A fresh sweep of Yongqiang Tian's publication page, arXiv, DBLP and the SPLASH/ISSTA 2026 program did not expose a newer compiler/testing/program-reduction paper beyond the already tracked July 2026 work. The next highest-priority unfinished 2026 item was therefore **RepoTrace**.
 
-The official `uw-pluverse/thalia-type` artifact is public and includes the benchmark data, transformations, saved SnR/Llama/GPT outputs and upstream metric implementation. Reprocessing is intentionally partial because the current public artifact snapshot does not expose the StarCoder2 result directories needed to recompute the two StarCoder2 Figure 7 cells.
+RepoTrace's paper points to both the public `t3-research/RepoTrace` GitHub source and Zenodo `10.5281/zenodo.20954131`. The pinned GitHub initial release builds a real TypeScript/SQLite/Express/React/Chrome-extension artifact, but it has a packaging discrepancy: `README.md`/`REPRODUCIBILITY.md` refer to `paper/supporting/VALIDATION_NOTES.md` and a packaging list containing `paper/` plus `PROJECT_PLAN.md`, while those paths are absent from the public GitHub tree. Because the seeded demo is explicitly not the full 20-record Matplotlib validation dataset, today's work is labeled scoped L2 plus L0 artifact audit rather than L1.
 
 ## Next queue
 
-1. **RepoTrace** — new 2026 tool demo; useful for evidence provenance in GitHub-based empirical research.
-2. **DebugTracker** — new 2026 tool demo; process-evidence tooling.
-3. **TEMPLATEFUZZ** — 2026 testing work, but lower priority for the compiler-focused track.
-4. **Enhancing Differential Testing with LLMs for Testing Deep Learning Libraries** — DBLP publication-year drift remains recorded; reproduce after higher-priority 2026 queue.
+1. **DebugTracker** — new 2026 tool demo; process-evidence tooling with a public validation suite.
+2. **TEMPLATEFUZZ** — 2026 testing work, but lower priority for the compiler-focused track.
+3. **Enhancing Differential Testing with LLMs for Testing Deep Learning Libraries** — DBLP publication-year drift remains recorded; reproduce after higher-priority 2026 queue.
