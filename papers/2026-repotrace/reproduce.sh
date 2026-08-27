@@ -61,8 +61,10 @@ python3 - "$RESULTS" "$UPSTREAM_SHA" <<'PY'
 import json, pathlib, re, sys
 out = pathlib.Path(sys.argv[1])
 sha = sys.argv[2]
-log = (out / "npm-test.log").read_text(errors="replace")
-# Vitest 3 normally prints: "Tests  37 passed (37)".
+raw_log = (out / "npm-test.log").read_text(errors="replace")
+# GitHub logs preserve Vitest ANSI styling, so strip escape sequences before parsing.
+ansi = re.compile(r"\x1b\[[0-?]*[ -/]*[@-~]")
+log = ansi.sub("", raw_log)
 m = re.search(r"Tests\s+(\d+)\s+passed", log)
 passed = int(m.group(1)) if m else None
 health = json.loads((out / "health.json").read_text())
@@ -82,7 +84,7 @@ summary = {
     "health": health,
     "seeded_export_top_level_keys": sorted(export.keys()) if isinstance(export, dict) else [],
     "seeded_records": size(export.get("records")) if isinstance(export, dict) else None,
-    "seeded_snapshots": size(export.get("record_snapshots")) if isinstance(export, dict) else None,
+    "seeded_snapshots": size(export.get("snapshots")) if isinstance(export, dict) else None,
     "seeded_annotations": size(export.get("annotations")) if isinstance(export, dict) else None,
     "artifact_audit": audit,
     "paper_validation_claims": {
