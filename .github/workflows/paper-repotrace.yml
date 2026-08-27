@@ -1,0 +1,34 @@
+name: paper-repotrace
+
+on:
+  push:
+    paths:
+      - 'papers/2026-repotrace/**'
+      - '.github/workflows/paper-repotrace.yml'
+  pull_request:
+    paths:
+      - 'papers/2026-repotrace/**'
+      - '.github/workflows/paper-repotrace.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  scoped-l2-upstream-artifact:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+      - name: Rebuild, test, seed, and exercise RepoTrace APIs
+        run: bash papers/2026-repotrace/reproduce.sh
+      - name: Upload reproduction evidence
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: repotrace-reproduction-report
+          path: papers/2026-repotrace/results/
+          if-no-files-found: error
