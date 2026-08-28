@@ -34,6 +34,22 @@ sha256sum "$RESULTS/debug-tracker-rebuilt.vsix" > "$RESULTS/rebuilt-vsix.sha256"
 stat -c '%n %s' debug-tracker-0.1.0.vsix "$RESULTS/debug-tracker-rebuilt.vsix" > "$RESULTS/vsix-sizes.txt"
 unzip -l debug-tracker-0.1.0.vsix > "$RESULTS/upstream-vsix-contents.txt"
 unzip -l "$RESULTS/debug-tracker-rebuilt.vsix" > "$RESULTS/rebuilt-vsix-contents.txt"
+
+UPSTREAM_BYTES="$(stat -c '%s' debug-tracker-0.1.0.vsix)"
+REBUILT_BYTES="$(stat -c '%s' "$RESULTS/debug-tracker-rebuilt.vsix")"
+UPSTREAM_ENTRIES="$(unzip -Z1 debug-tracker-0.1.0.vsix | wc -l | tr -d ' ')"
+REBUILT_ENTRIES="$(unzip -Z1 "$RESULTS/debug-tracker-rebuilt.vsix" | wc -l | tr -d ' ')"
+UPSTREAM_STATE_ENTRIES="$(unzip -Z1 debug-tracker-0.1.0.vsix | grep -c '^extension/\.debugtracker/' || true)"
+REBUILT_STATE_ENTRIES="$(unzip -Z1 "$RESULTS/debug-tracker-rebuilt.vsix" | grep -c '^extension/\.debugtracker/' || true)"
+cat > "$RESULTS/vsix-packaging-drift.txt" <<EOF
+prebuilt_bytes=$UPSTREAM_BYTES
+rebuilt_bytes=$REBUILT_BYTES
+prebuilt_entries=$UPSTREAM_ENTRIES
+rebuilt_entries=$REBUILT_ENTRIES
+prebuilt_debugtracker_state_entries=$UPSTREAM_STATE_ENTRIES
+rebuilt_debugtracker_state_entries=$REBUILT_STATE_ENTRIES
+EOF
+cat "$RESULTS/vsix-packaging-drift.txt"
 popd >/dev/null
 
 run_task() {
@@ -106,7 +122,7 @@ cat > "$RESULTS/summary.md" <<EOF
 - Reproduction level: **L0 artifact audit + scoped L2 live-minimal**
 - Upstream automated suite: **fresh run passed**
 - Paper-visible validation structure: **16 automated checks + 11 manual trial cases** (audited from pinned source/docs)
-- VSIX: **fresh package build completed**; committed and rebuilt hashes/sizes are recorded separately
+- VSIX: **fresh package build completed**; committed and rebuilt hashes/sizes/package-state entries are recorded separately
 - Cross-language sample bug: TypeScript/Python/Java all **failed before** and **passed after** the documented one-line fix
 
 ## Boundary
