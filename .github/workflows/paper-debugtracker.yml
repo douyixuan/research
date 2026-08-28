@@ -1,0 +1,41 @@
+name: paper-debugtracker
+
+on:
+  push:
+    paths:
+      - 'papers/2026-debugtracker/**'
+      - '.github/workflows/paper-debugtracker.yml'
+  pull_request:
+    paths:
+      - 'papers/2026-debugtracker/**'
+      - '.github/workflows/paper-debugtracker.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  scoped-l2-live-artifact:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '20'
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Rebuild, test, audit, and run cross-language sample bug
+        run: bash papers/2026-debugtracker/reproduce.sh
+      - name: Upload reproduction evidence
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: debugtracker-reproduction-report
+          path: papers/2026-debugtracker/results/
+          if-no-files-found: error
