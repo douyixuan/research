@@ -31,6 +31,8 @@ echo "==> Rebuild VSIX"
 npm run package -- --out "$RESULTS/debug-tracker-rebuilt.vsix" 2>&1 | tee "$RESULTS/package.log"
 sha256sum debug-tracker-0.1.0.vsix > "$RESULTS/upstream-vsix.sha256"
 sha256sum "$RESULTS/debug-tracker-rebuilt.vsix" > "$RESULTS/rebuilt-vsix.sha256"
+stat -c '%n %s' debug-tracker-0.1.0.vsix "$RESULTS/debug-tracker-rebuilt.vsix" > "$RESULTS/vsix-sizes.txt"
+unzip -l debug-tracker-0.1.0.vsix > "$RESULTS/upstream-vsix-contents.txt"
 unzip -l "$RESULTS/debug-tracker-rebuilt.vsix" > "$RESULTS/rebuilt-vsix-contents.txt"
 popd >/dev/null
 
@@ -104,7 +106,7 @@ cat > "$RESULTS/summary.md" <<EOF
 - Reproduction level: **L0 artifact audit + scoped L2 live-minimal**
 - Upstream automated suite: **fresh run passed**
 - Paper-visible validation structure: **16 automated checks + 11 manual trial cases** (audited from pinned source/docs)
-- VSIX: **fresh package build completed**
+- VSIX: **fresh package build completed**; committed and rebuilt hashes/sizes are recorded separately
 - Cross-language sample bug: TypeScript/Python/Java all **failed before** and **passed after** the documented one-line fix
 
 ## Boundary
