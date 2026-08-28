@@ -47,21 +47,40 @@ The script:
 1. clones the official artifact and checks out the pinned snapshot;
 2. statically audits the 16 automated-test calls and 11 documented manual cases;
 3. runs `npm ci && npm test` from scratch;
-4. rebuilds the VSIX and records hashes/package contents;
+4. rebuilds the VSIX and records hashes, sizes, package contents, and generated-state entries;
 5. runs the buggy TypeScript/Python/Java checkout-pricing tasks and requires each to fail;
 6. applies only the documented one-line shipping-basis fix in each language and requires each task to pass;
 7. writes all evidence under `results/`.
 
 GitHub Actions supplies pinned Node/Python/JDK environments so the cross-language smoke test is repeatable.
 
+## Observed live results
+
+On GitHub Actions (Ubuntu 24.04, Node 20.20.2, Python 3.12.14, Temurin JDK 21.0.12):
+
+- official automated suite: **pass**;
+- structural audit: **16 automated checks** and **11 manual trial cases**, exactly matching the published validation structure;
+- TypeScript sample: buggy version fails with `shippingCents` **0 instead of 799**; documented one-line fix passes;
+- Python sample: buggy version has **2 failing tests / 3** with `0 != 799`; documented fix gives **3/3 pass**;
+- Java sample: buggy version has **2 failing cases** with expected `799` but actual `0`; documented fix gives **3/3 pass**;
+- a fresh VSIX build succeeds.
+
+### Packaging drift discovered during reproduction
+
+The repository-committed `debug-tracker-0.1.0.vsix` is **6,189,580 bytes / 188 entries**, whereas a clean rebuild from the same pinned source is only **82,719 bytes / 26 entries**. Their SHA-256 hashes differ, as expected from that content difference.
+
+The committed VSIX contains generated `.debugtracker/` state, including reviewer-smoke outputs and a staged student-trial tree. A clean rebuild excludes those generated-state files. This does not invalidate the source-level functional checks, but it is an important artifact-packaging/provenance issue: the checked-in binary is not simply a clean package of the pinned source tree.
+
+The current dependency install also reports **6 npm vulnerabilities (2 moderate, 4 high)** and several deprecated packages, including the old `vsce` package that has since moved to `@vscode/vsce`. These are modern-toolchain drift findings rather than claims about the paper-era evaluation.
+
 ## Paper vs reproduction
 
 | Claim / property | Paper | This reproduction |
 |---|---|---|
-| Automated validation | 16 checks pass | Fresh upstream suite + structural count audit |
-| Manual validation | 11 cases across packaged VSIX and three OSes | Matrix count audited only; GUI/manual cases not fully executed |
+| Automated validation | 16 checks pass | Fresh upstream suite passes + structural count audit = 16 |
+| Manual validation | 11 cases across packaged VSIX and three OSes | Matrix count = 11 audited only; GUI/manual cases not fully executed |
 | Cross-language task | TypeScript, Python, Java share the same intended bug | Fresh fail-before / pass-after execution for all three languages |
-| Packaged extension | Prebuilt `debug-tracker-0.1.0.vsix` | Fresh VSIX build; hash recorded, binary identity not assumed |
+| Packaged extension | Prebuilt `debug-tracker-0.1.0.vsix` | Fresh VSIX builds, but committed binary shows substantial generated-state packaging drift |
 | Evaluation vs Training separation | Explicit mode policy | Covered by upstream automated suite, not a human UI trial here |
 | Classroom assessment benefit | Future work / not established by this tool-demo validation | Not claimed |
 
@@ -87,7 +106,7 @@ No API key is required for the current reproduction because remote AI feedback i
 - Upstream unit tests are written by the artifact authors, so passing them demonstrates implementation consistency, not independent correctness.
 - The shared three-language task is intentionally small; it supports language-agnostic plumbing but not general language independence.
 - The 11 manual cases are documented acceptance tests rather than a controlled user study.
-- Rebuilding a VSIX does not imply byte-for-byte reproducible packaging; timestamps/tooling metadata may differ.
+- Rebuilding a VSIX does not imply byte-for-byte reproducible packaging; here the discrepancy is much larger than timestamp metadata because the committed binary includes generated `.debugtracker/` state.
 - GitHub Actions cannot directly establish whether captured process traces improve instructor judgment or student learning.
 
 ## Most valuable extension: evidence quality, not event volume
