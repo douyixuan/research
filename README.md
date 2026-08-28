@@ -40,6 +40,7 @@ The repository should never call an L1 result a full reproduction.
 | 2026-08-25 | [LPR+: Diverse Transformations for LLM-Aided Program Reduction](papers/2026-lpr-plus/) | SPLASH/ISSTA 2026 Tool Demo | L0 + scoped L2 live-minimal | `paper-lpr-plus.yml` |
 | 2026-08-26 | [Unmasking the Type Inference Capabilities of LLMs for Java Code Snippets](papers/2026-thaliatype/) | ACM TOSEM 2026 | L1 partial | `paper-thaliatype.yml` ✅ |
 | 2026-08-27 | [RepoTrace: Browser-Assisted Evidence Collection for GitHub Research Datasets](papers/2026-repotrace/) | SPLASH/ISSTA 2026 Tool Demo | L0 artifact audit + scoped L2 | `paper-repotrace.yml` |
+| 2026-08-28 | [DebugTracker: Lightweight Process Evidence for Classroom Debugging](papers/2026-debugtracker/) | SPLASH/ISSTA 2026 Tool Demo | L0 artifact audit + scoped L2 | `paper-debugtracker.yml` |
 
 ## Daily workflow
 
