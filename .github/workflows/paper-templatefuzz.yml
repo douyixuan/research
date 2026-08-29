@@ -1,0 +1,37 @@
+name: paper-templatefuzz
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'papers/2026-templatefuzz/**'
+      - '.github/workflows/paper-templatefuzz.yml'
+  pull_request:
+    paths:
+      - 'papers/2026-templatefuzz/**'
+      - '.github/workflows/paper-templatefuzz.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  safe-mechanism-reproduction:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Reproduce TemplateFuzz mechanism safely
+        run: bash papers/2026-templatefuzz/reproduce.sh
+
+      - name: Upload reproduction evidence
+        uses: actions/upload-artifact@v6
+        with:
+          name: templatefuzz-reproduction-report
+          path: papers/2026-templatefuzz/results/
