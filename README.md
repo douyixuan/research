@@ -42,6 +42,7 @@ The repository should never call an L1 result a full reproduction.
 | 2026-08-27 | [RepoTrace: Browser-Assisted Evidence Collection for GitHub Research Datasets](papers/2026-repotrace/) | SPLASH/ISSTA 2026 Tool Demo | L0 artifact audit + scoped L2 | `paper-repotrace.yml` |
 | 2026-08-28 | [DebugTracker: Lightweight Process Evidence for Classroom Debugging](papers/2026-debugtracker/) | SPLASH/ISSTA 2026 Tool Demo | L0 artifact audit + scoped L2 | `paper-debugtracker.yml` ✅ |
 | 2026-08-29 | [TEMPLATEFUZZ: Fine-Grained Chat Template Fuzzing for Jailbreaking and Red Teaming LLMs](papers/2026-templatefuzz/) | arXiv 2026 preprint | L0 artifact/interface audit + scoped L2 safe mechanism | `paper-templatefuzz.yml` |
+| 2026-08-30 | [Enhancing Differential Testing with LLMs for Testing Deep Learning Libraries (DLLens)](papers/2026-dllens/) | ACM TOSEM 35(4), 2026 | L1 partial + L0 implementation audit | `paper-dllens.yml` |
 
 ## Daily workflow
 

@@ -1,0 +1,37 @@
+name: paper-dllens
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'papers/2026-dllens/**'
+      - '.github/workflows/paper-dllens.yml'
+  pull_request:
+    paths:
+      - 'papers/2026-dllens/**'
+      - '.github/workflows/paper-dllens.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  l1-released-artifact:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+      - name: Fetch pinned official DLLens artifact
+        run: |
+          git clone https://github.com/maybeLee/DLLens.git /tmp/DLLens
+          git -C /tmp/DLLens checkout --detach 0f617e92c34d60bfdd3bc06d80c17d938879ed9c
+          test "$(git -C /tmp/DLLens rev-parse HEAD)" = "0f617e92c34d60bfdd3bc06d80c17d938879ed9c"
+      - name: Recompute released RQ1 and RQ4 evidence
+        run: |
+          python3 papers/2026-dllens/reproduce.py /tmp/DLLens
+      - name: Publish reproduction report
+        uses: actions/upload-artifact@v6
+        with:
+          name: dllens-reproduction-report
+          path: papers/2026-dllens/results/
+          if-no-files-found: error
