@@ -1,6 +1,6 @@
 # Yongqiang Tian paper tracker
 
-Last public-source sweep: **2026-08-30**.
+Last public-source sweep: **2026-08-31**.
 
 This file separates the discovery queue from completed reproduction directories. It intentionally includes preprints and tool demonstrations that may not yet be prominent in Scholar/DBLP so they do not get lost between daily runs.
 
@@ -8,6 +8,7 @@ This file separates the discovery queue from completed reproduction directories.
 |---|---|---|
 | LPO: Discovering Missed Peephole Optimizations with Large Language Models | ASPLOS 2026 | ✅ `papers/2026-lpo/` |
 | Unmasking the Type Inference Capabilities of LLMs for Java Code Snippets | TOSEM 2026 | ✅ `papers/2026-thaliatype/` — L1 partial |
+| Rethinking LLM-aided RTL Code Optimization Via Timing Logic Metamorphosis | TRETS 2026 on yqtian.com; public arXiv v1 is 2025 and has older authorship | ✅ `papers/2026-rtl-timing-metamorphosis/` — L0 provenance audit + scoped L2 |
 | Optimization-Aware Test Generation for Deep Learning Compilers | ICSE 2026 | ✅ `papers/2026-oatest/` |
 | Bounded Exhaustive Random Program Generation for Testing Solidity Compilers | ICSE 2026 | ✅ `papers/2026-erwin/` |
 | On the Feasibility of Deduplicating Compiler Bugs with Bisection | ISSTA 2026 | ✅ `papers/2026-buglens/` |
@@ -30,12 +31,12 @@ This file separates the discovery queue from completed reproduction directories.
 - arXiv searches for newly indexed preprints
 - conference publication pages and official artifacts/GitHub repositories
 
-## Discovery note (2026-08-30)
+## Discovery note (2026-08-31)
 
-A fresh sweep of Yongqiang Tian's publication page and recent arXiv indexing did not expose a newer 2026 compiler/testing/program-reduction paper beyond the already tracked July work. DLLens is completed today because DBLP indexes the final journal article as TOSEM 35(4), 2026 while the author's full publication list still groups it under TOSEM 2025.
+Today's fresh sweep found one 2026 item missing from the tracker: **Rethinking LLM-aided RTL Code Optimization Via Timing Logic Metamorphosis**, now listed by Yongqiang Tian's publication page as TRETS 2026. The inspectable arXiv v1 (`2507.16808`, 2025-07-22) has an older title/authorship snapshot and no official artifact surfaced in exact-title GitHub searches, so today's work explicitly separates provenance auditing from the live experiment.
 
-Today's reproduction pins the official artifact at `maybeLee/DLLens@0f617e92c34d60bfdd3bc06d80c17d938879ed9c`. It reprocesses released raw RQ1 round files and RQ4 confirmed-bug CSVs, reproducing 689 TensorFlow + 712 PyTorch counterparts (1.84× the released TensorScope baseline totals) and 59 confirmed bugs = 46 previously unknown + 13 known, including 10 newly found bugs later fixed. It is intentionally labeled L1 partial: the 71 total detected bugs, RQ3 coverage, and a fresh LLM-driven campaign are not rerun in this deterministic lane.
+The scoped L2 implements a fresh logic-operation metamorphosis, checks semantic equivalence with Icarus Verilog plus Yosys formal equivalence, and synthesizes original/mutant RTL with the current open-source toolchain. It does not rerun GPT-4, Claude-3.7-Sonnet, RTLRewriter, the 153-case benchmark, or the paper's complete PPA flow.
 
 ## Next queue
 
-No newer unfinished 2026 item was found in today's sweep. On the next run, re-scan first; if none appears, continue backward into the highest-priority unfinished compiler/testing/program-reduction paper.
+Re-scan 2026 first. If no new item appears, continue backward into the highest-priority unfinished compiler/testing/program-reduction paper, starting with 2025 program-reduction work such as Latra / syntax-guided transformations / probabilistic or weighted delta debugging.
