@@ -1,0 +1,35 @@
+name: paper-rtl-timing-metamorphosis
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'papers/2026-rtl-timing-metamorphosis/**'
+      - '.github/workflows/paper-rtl-timing-metamorphosis.yml'
+  pull_request:
+    paths:
+      - 'papers/2026-rtl-timing-metamorphosis/**'
+      - '.github/workflows/paper-rtl-timing-metamorphosis.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  l2-logic-metamorphosis:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+      - name: Install open-source RTL toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y yosys iverilog
+      - name: Run scoped live reproduction
+        run: bash papers/2026-rtl-timing-metamorphosis/reproduce.sh
+      - name: Publish reproduction evidence
+        uses: actions/upload-artifact@v6
+        with:
+          name: rtl-timing-metamorphosis-results
+          path: papers/2026-rtl-timing-metamorphosis/results/
+          if-no-files-found: error
