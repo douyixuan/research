@@ -44,8 +44,10 @@ def assert_close(actual: float, expected: float, tolerance: float = 0.02) -> Non
         raise AssertionError(f"expected {expected:.2f}, got {actual:.4f}")
 
 
-def rounded_means(rows: list[dict[str, str]]) -> dict[str, int]:
-    return {col: round(mean(rows, col)) for col in ("Vulcan", "ddSMT", "Latra")}
+def paper_style_means(rows: list[dict[str, str]]) -> dict[str, int]:
+    # The released plotting script does `round(2).astype(int)`: two-decimal
+    # rounding followed by truncation to an integer, rather than Python round().
+    return {col: int(round(mean(rows, col), 2)) for col in ("Vulcan", "ddSMT", "Latra")}
 
 
 def main() -> None:
@@ -53,6 +55,12 @@ def main() -> None:
     smt_tokens = fetch_csv("smt_tokens")
     smt_time = fetch_csv("smt_time")
     smt_queries = fetch_csv("smt_queries")
+
+    paper_figure4 = {
+        "tokens": {"Vulcan": 121, "ddSMT": 109, "Latra": 103},
+        "queries": {"Vulcan": 23708, "ddSMT": 2600, "Latra": 26048},
+        "time": {"Vulcan": 1360, "ddSMT": 230, "Latra": 733},
+    }
 
     report = {
         "artifact_commit": ARTIFACT_COMMIT,
@@ -67,18 +75,14 @@ def main() -> None:
         },
         "smt": {
             "avg_per_case_token_gain_vs_vulcan_pct": avg_relative_gain(smt_tokens, "Vulcan", "Latra"),
-            "avg_per_case_time_gain_vs_vulcan_pct": avg_relative_gain(smt_time, "Vulcan", "Latra"),
+            "avg_per_case_time_gain_vs_vulcan_pct_public_csv": avg_relative_gain(smt_time, "Vulcan", "Latra"),
             "csv_mean_tokens": {col: mean(smt_tokens, col) for col in ("Vulcan", "ddSMT", "Latra")},
             "csv_mean_queries": {col: mean(smt_queries, col) for col in ("Vulcan", "ddSMT", "Latra")},
             "csv_mean_time": {col: mean(smt_time, col) for col in ("Vulcan", "ddSMT", "Latra")},
-            "csv_rounded_mean_tokens": rounded_means(smt_tokens),
-            "csv_rounded_mean_queries": rounded_means(smt_queries),
-            "csv_rounded_mean_time": rounded_means(smt_time),
-            "paper_figure4_rounded_means": {
-                "tokens": {"Vulcan": 121, "ddSMT": 109, "Latra": 103},
-                "queries": {"Vulcan": 23708, "ddSMT": 2600, "Latra": 26048},
-                "time": {"Vulcan": 1360, "ddSMT": 230, "Latra": 733},
-            },
+            "paper_style_mean_tokens": paper_style_means(smt_tokens),
+            "paper_style_mean_queries": paper_style_means(smt_queries),
+            "paper_style_mean_time": paper_style_means(smt_time),
+            "paper_figure4_rounded_means": paper_figure4,
             "paper_reported_time_gain_vs_vulcan_pct": 32.27,
         },
     }
@@ -90,13 +94,18 @@ def main() -> None:
     assert round(report["c"]["mean_tokens_latra"]) == 89
     assert round(report["c"]["mean_tokens_creduce"]) == 85
     assert_close(report["smt"]["avg_per_case_token_gain_vs_vulcan_pct"], 9.17)
+    assert report["smt"]["paper_style_mean_tokens"] == paper_figure4["tokens"]
 
+    # The public 2026 artifact snapshot no longer matches the paper's Latra
+    # query/time columns, so record the drift instead of silently treating it as
+    # a reproduction failure or rewriting the data to fit the paper.
     report["smt"]["figure4_matches_public_csv"] = {
-        metric: report["smt"][f"csv_rounded_mean_{metric}"] == expected
-        for metric, expected in report["smt"]["paper_figure4_rounded_means"].items()
+        "tokens": report["smt"]["paper_style_mean_tokens"] == paper_figure4["tokens"],
+        "queries": report["smt"]["paper_style_mean_queries"] == paper_figure4["queries"],
+        "time": report["smt"]["paper_style_mean_time"] == paper_figure4["time"],
     }
     report["smt"]["time_gain_matches_32_27"] = abs(
-        report["smt"]["avg_per_case_time_gain_vs_vulcan_pct"] - 32.27
+        report["smt"]["avg_per_case_time_gain_vs_vulcan_pct_public_csv"] - 32.27
     ) <= 0.02
 
     RESULTS.mkdir(parents=True, exist_ok=True)
