@@ -21,11 +21,11 @@ jobs:
     timeout-minutes: 40
     steps:
       - uses: actions/checkout@v6
-      - name: Install JDK for current Perses/Bazel
+      - name: Show runner toolchain
         run: |
-          sudo apt-get update
-          sudo apt-get install -y openjdk-21-jdk
-          java -version
+          python3 --version
+          git --version
+          java -version || true
       - name: Recompute published evidence and run live Latra tests
         run: bash papers/2025-latra/reproduce.sh
       - name: Publish reproduction evidence
