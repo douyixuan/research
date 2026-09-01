@@ -32,16 +32,36 @@ jobs:
 
   official-demo:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v6
-      - name: Record Docker environment
-        run: docker --version
-      - name: Pull official WDD artifact image
-        run: docker pull wddartifact/wdd:latest
-      - name: Run one official Perses ddmin/Wddmin C demo
+
+      - name: Free disk for the paper artifact image
         run: |
           mkdir -p papers/2025-wdd/results-official
+          df -h / | tee papers/2025-wdd/results-official/disk-before-cleanup.txt
+          # The published WDD image contains a large historical compiler/toolchain stack.
+          # None of the preinstalled Android/.NET/Haskell/CodeQL toolchains are needed
+          # in this job, so remove them before pulling the artifact image.
+          sudo rm -rf /usr/local/lib/android /usr/share/dotnet /opt/ghc /usr/local/.ghcup
+          sudo rm -rf /opt/hostedtoolcache/CodeQL || true
+          sudo apt-get clean
+          docker system prune -af || true
+          df -h / | tee papers/2025-wdd/results-official/disk-after-cleanup.txt
+
+      - name: Record Docker environment
+        run: docker --version | tee papers/2025-wdd/results-official/docker-version.txt
+
+      - name: Pull official WDD artifact image
+        run: |
+          docker pull wddartifact/wdd:latest
+          docker image inspect wddartifact/wdd:latest \
+            --format 'id={{.Id}} size={{.Size}} repo_digests={{json .RepoDigests}}' \
+            | tee papers/2025-wdd/results-official/image.txt
+          df -h / | tee papers/2025-wdd/results-official/disk-after-pull.txt
+
+      - name: Run one official Perses ddmin/Wddmin C demo
+        run: |
           docker run --rm \
             --cap-add SYS_PTRACE \
             -v "$PWD/papers/2025-wdd/results-official:/host-results" \
@@ -57,6 +77,7 @@ jobs:
               cp -a result_ci /host-results/
               find result_ci -maxdepth 3 -type f | sort > /host-results/files.txt
             '
+
       - name: Publish official artifact smoke output
         if: always()
         uses: actions/upload-artifact@v6
