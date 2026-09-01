@@ -70,19 +70,29 @@ def main() -> None:
             "mean_queries_vulcan": mean(smt_queries, "Vulcan"),
             "mean_queries_ddsmt": mean(smt_queries, "ddSMT"),
             "mean_queries_latra": mean(smt_queries, "Latra"),
+            "paper_reported_mean_tokens": {"Vulcan": 121, "ddSMT": 109, "Latra": 103},
         },
     }
 
-    # Headline numbers reported in the ASE 2025 paper/artifact README.
+    # Claims that can be reproduced exactly from the released CSV rows.
     assert len(c_rows) == 20
     assert len(smt_tokens) == 205
     assert_close(report["c"]["avg_per_case_token_gain_vs_vulcan_pct"], 33.77)
     assert round(report["c"]["mean_tokens_latra"]) == 89
     assert round(report["c"]["mean_tokens_creduce"]) == 85
     assert_close(report["smt"]["avg_per_case_token_gain_vs_vulcan_pct"], 9.17)
-    assert round(report["smt"]["mean_tokens_latra"]) == 103
-    assert round(report["smt"]["mean_tokens_ddsmt"]) == 109
     assert_close(report["smt"]["avg_per_case_time_gain_vs_vulcan_pct"], 32.27)
+
+    # Preserve, rather than hide, any discrepancy between the released CSV
+    # snapshot and the integer summary printed in the paper.
+    report["smt"]["rounded_csv_mean_tokens"] = {
+        "Vulcan": round(report["smt"]["mean_tokens_vulcan"]),
+        "ddSMT": round(report["smt"]["mean_tokens_ddsmt"]),
+        "Latra": round(report["smt"]["mean_tokens_latra"]),
+    }
+    report["smt"]["mean_summary_matches_paper"] = (
+        report["smt"]["rounded_csv_mean_tokens"] == report["smt"]["paper_reported_mean_tokens"]
+    )
 
     RESULTS.mkdir(parents=True, exist_ok=True)
     (RESULTS / "l1-report.json").write_text(json.dumps(report, indent=2) + "\n")
