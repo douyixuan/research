@@ -1,0 +1,66 @@
+name: paper-wdd
+
+on:
+  push:
+    paths:
+      - 'papers/2025-wdd/**'
+      - '.github/workflows/paper-wdd.yml'
+  pull_request:
+    paths:
+      - 'papers/2025-wdd/**'
+      - '.github/workflows/paper-wdd.yml'
+  workflow_dispatch:
+
+jobs:
+  scoped-l2:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+      - name: Run deterministic Wddmin mechanism + ablation
+        run: bash papers/2025-wdd/reproduce.sh
+      - name: Publish mechanism report
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: wdd-mechanism-report
+          path: papers/2025-wdd/results/
+          if-no-files-found: error
+
+  official-demo:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v6
+      - name: Record Docker environment
+        run: docker --version
+      - name: Pull official WDD artifact image
+        run: docker pull wddartifact/wdd:latest
+      - name: Run one official Perses ddmin/Wddmin C demo
+        run: |
+          mkdir -p papers/2025-wdd/results-official
+          docker run --rm \
+            --cap-add SYS_PTRACE \
+            -v "$PWD/papers/2025-wdd/results-official:/host-results" \
+            wddartifact/wdd:latest \
+            bash -lc '
+              set -euo pipefail
+              cd /tmp/WeightDD
+              cases=(c_demo_benchmarks/*)
+              test ${#cases[@]} -gt 0
+              selected=${cases[0]}
+              printf "%s\n" "$selected" | tee /host-results/selected-case.txt
+              ./run_exp_parallel_c.py -s "$selected" -r perses_ddmin perses_wdd -o result_ci -j 1
+              cp -a result_ci /host-results/
+              find result_ci -maxdepth 3 -type f | sort > /host-results/files.txt
+            '
+      - name: Publish official artifact smoke output
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: wdd-official-demo
+          path: papers/2025-wdd/results-official/
+          if-no-files-found: error
