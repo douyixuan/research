@@ -1,0 +1,57 @@
+name: paper-latra
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'papers/2025-latra/**'
+      - '.github/workflows/paper-latra.yml'
+  pull_request:
+    paths:
+      - 'papers/2025-latra/**'
+      - '.github/workflows/paper-latra.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  l1-reported-results:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+      - name: Recompute released Latra results
+        run: bash papers/2025-latra/reproduce.sh
+      - name: Publish L1 evidence
+        uses: actions/upload-artifact@v6
+        with:
+          name: latra-l1-results
+          path: papers/2025-latra/results/
+          if-no-files-found: error
+
+  l2-official-smoke:
+    needs: l1-reported-results
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v6
+      - name: Prepare evidence directory
+        run: mkdir -p papers/2025-latra/results
+      - name: Pull official artifact image
+        run: |
+          docker pull cancel/latra-artifact:latest
+          docker image inspect cancel/latra-artifact:latest --format '{{index .RepoDigests 0}}' | tee papers/2025-latra/results/docker-image.txt
+      - name: Run one official SMT-LIB benchmark
+        run: |
+          docker run --rm --cap-add SYS_PTRACE \
+            -v "$PWD/papers/2025-latra/results:/out" \
+            cancel/latra-artifact:latest \
+            bash -lc 'cd /tmp/benchmark && rm -rf /tmp/latra_one && ./run_alternating.py -s smt_benchmarks/benchmarks/btor2-bug-12208-547/ -r latra vulcan -o /tmp/latra_one -j 1 && ./parse_alternating_result.py -d /tmp/latra_one | tee /out/l2-btor2-bug-12208-547.csv'
+          test -s papers/2025-latra/results/l2-btor2-bug-12208-547.csv
+      - name: Publish L2 evidence
+        uses: actions/upload-artifact@v6
+        with:
+          name: latra-l2-official-smoke
+          path: papers/2025-latra/results/
+          if-no-files-found: error
