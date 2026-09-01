@@ -1,6 +1,6 @@
 # Yongqiang Tian paper tracker
 
-Last public-source sweep: **2026-08-31**.
+Last public-source sweep: **2026-09-01**.
 
 This file separates the discovery queue from completed reproduction directories. It intentionally includes preprints and tool demonstrations that may not yet be prominent in Scholar/DBLP so they do not get lost between daily runs.
 
@@ -23,6 +23,7 @@ This file separates the discovery queue from completed reproduction directories.
 | Semantic-aware and Self-improving Program Reduction via Agentic Large Language Models (PROJ) | arXiv 2607.03766, 2026-07-04 | ✅ `papers/2026-proj/` |
 | VIZDETOUR: Detecting Rendering Bugs in Imperative Data Visualization Libraries via Equivalent Mutations | 2026 preprint | ✅ `papers/2026-vizdetour/` |
 | Enhancing Differential Testing with LLMs for Testing Deep Learning Libraries | ACM TOSEM 35(4), Article 88, Apr 2026; author page lists TOSEM 2025 | ✅ `papers/2026-dllens/` — L1 partial + L0 implementation audit |
+| Latra: A Template-Based Language-Agnostic Transformation Framework for Effective Program Reduction | ASE 2025 | ✅ `papers/2025-latra/` — L1 partial + scoped L2 current-source probe |
 
 ## Discovery sources
 
@@ -31,12 +32,14 @@ This file separates the discovery queue from completed reproduction directories.
 - arXiv searches for newly indexed preprints
 - conference publication pages and official artifacts/GitHub repositories
 
-## Discovery note (2026-08-31)
+## Discovery note (2026-09-01)
 
-Today's fresh sweep found one 2026 item missing from the tracker: **Rethinking LLM-aided RTL Code Optimization Via Timing Logic Metamorphosis**, now listed by Yongqiang Tian's publication page as TRETS 2026. The inspectable arXiv v1 (`2507.16808`, 2025-07-22) has an older title/authorship snapshot and no official artifact surfaced in exact-title GitHub searches, so today's work explicitly separates provenance auditing from the live experiment.
+Today's fresh sweep of Yongqiang Tian's publication page, DBLP, and recent arXiv indexing did not surface a new relevant 2026 software-engineering/compiler paper beyond the 2026 items already tracked. Search also surfaces homonymous authors in unrelated fields, so author identity/affiliation is checked before inserting a paper.
 
-The scoped L2 implements a fresh logic-operation metamorphosis, checks semantic equivalence with Icarus Verilog plus Yosys formal equivalence, and synthesizes original/mutant RTL with the current open-source toolchain. It does not rerun GPT-4, Claude-3.7-Sonnet, RTLRewriter, the 153-case benchmark, or the paper's complete PPA flow.
+Following the priority queue, today's target is **Latra: A Template-Based Language-Agnostic Transformation Framework for Effective Program Reduction** (ASE 2025). Its official artifact was published publicly in March 2026, making it newly practical to audit and reproduce. The reproduction reprocesses the public result CSVs for L1 evidence and separately runs a fresh scoped L2 probe against the current pinned Perses/Latra implementation.
+
+The public artifact repository contains result summaries and analysis scripts, while the full 20-C/205-SMT benchmark/binary environment is documented through the mutable `cancel/latra-artifact:latest` Docker image. Therefore the work does not claim L3 until an immutable paper-era image/binary bundle is pinned and the full experiment is rerun.
 
 ## Next queue
 
-Re-scan 2026 first. If no new item appears, continue backward into the highest-priority unfinished compiler/testing/program-reduction paper, starting with 2025 program-reduction work such as Latra / syntax-guided transformations / probabilistic or weighted delta debugging.
+Re-scan 2026 first. If no new item appears, continue with 2025 compiler/program-reduction work, prioritizing **Boosting Program Reduction with the Missing Piece of Syntax-Guided Transformations (OOPSLA 2025)**, then **Toward a Better Understanding of Probabilistic Delta Debugging (ICSE 2025)** and **WDD: Weighted Delta Debugging (ICSE 2025)**.
