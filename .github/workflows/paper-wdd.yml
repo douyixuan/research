@@ -1,0 +1,87 @@
+name: paper-wdd
+
+on:
+  push:
+    paths:
+      - 'papers/2025-wdd/**'
+      - '.github/workflows/paper-wdd.yml'
+  pull_request:
+    paths:
+      - 'papers/2025-wdd/**'
+      - '.github/workflows/paper-wdd.yml'
+  workflow_dispatch:
+
+jobs:
+  scoped-l2:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+      - name: Run deterministic Wddmin mechanism + ablation
+        run: bash papers/2025-wdd/reproduce.sh
+      - name: Publish mechanism report
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: wdd-mechanism-report
+          path: papers/2025-wdd/results/
+          if-no-files-found: error
+
+  official-demo:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Free disk for the paper artifact image
+        run: |
+          mkdir -p papers/2025-wdd/results-official
+          df -h / | tee papers/2025-wdd/results-official/disk-before-cleanup.txt
+          # The published WDD image contains a large historical compiler/toolchain stack.
+          # None of the preinstalled Android/.NET/Haskell/CodeQL toolchains are needed
+          # in this job, so remove them before pulling the artifact image.
+          sudo rm -rf /usr/local/lib/android /usr/share/dotnet /opt/ghc /usr/local/.ghcup
+          sudo rm -rf /opt/hostedtoolcache/CodeQL || true
+          sudo apt-get clean
+          docker system prune -af || true
+          df -h / | tee papers/2025-wdd/results-official/disk-after-cleanup.txt
+
+      - name: Record Docker environment
+        run: docker --version | tee papers/2025-wdd/results-official/docker-version.txt
+
+      - name: Pull official WDD artifact image
+        run: |
+          docker pull wddartifact/wdd:latest
+          docker image inspect wddartifact/wdd:latest \
+            --format 'id={{.Id}} size={{.Size}} repo_digests={{json .RepoDigests}}' \
+            | tee papers/2025-wdd/results-official/image.txt
+          df -h / | tee papers/2025-wdd/results-official/disk-after-pull.txt
+
+      - name: Run one official Perses ddmin/Wddmin C demo
+        run: |
+          docker run --rm \
+            --cap-add SYS_PTRACE \
+            -v "$PWD/papers/2025-wdd/results-official:/host-results" \
+            wddartifact/wdd:latest \
+            bash -lc '
+              set -euo pipefail
+              cd /tmp/WeightDD
+              cases=(c_demo_benchmarks/*)
+              test ${#cases[@]} -gt 0
+              selected=${cases[0]}
+              printf "%s\n" "$selected" | tee /host-results/selected-case.txt
+              ./run_exp_parallel_c.py -s "$selected" -r perses_ddmin perses_wdd -o result_ci -j 1
+              cp -a result_ci /host-results/
+              find result_ci -maxdepth 3 -type f | sort > /host-results/files.txt
+            '
+
+      - name: Publish official artifact smoke output
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: wdd-official-demo
+          path: papers/2025-wdd/results-official/
+          if-no-files-found: error

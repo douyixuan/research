@@ -1,6 +1,6 @@
 # Yongqiang Tian paper tracker
 
-Last public-source sweep: **2026-08-31**.
+Last public-source sweep: **2026-09-01**.
 
 This file separates the discovery queue from completed reproduction directories. It intentionally includes preprints and tool demonstrations that may not yet be prominent in Scholar/DBLP so they do not get lost between daily runs.
 
@@ -23,6 +23,7 @@ This file separates the discovery queue from completed reproduction directories.
 | Semantic-aware and Self-improving Program Reduction via Agentic Large Language Models (PROJ) | arXiv 2607.03766, 2026-07-04 | ✅ `papers/2026-proj/` |
 | VIZDETOUR: Detecting Rendering Bugs in Imperative Data Visualization Libraries via Equivalent Mutations | 2026 preprint | ✅ `papers/2026-vizdetour/` |
 | Enhancing Differential Testing with LLMs for Testing Deep Learning Libraries | ACM TOSEM 35(4), Article 88, Apr 2026; author page lists TOSEM 2025 | ✅ `papers/2026-dllens/` — L1 partial + L0 implementation audit |
+| WDD: Weighted Delta Debugging | ICSE 2025; official Zenodo artifact v2 | ✅ `papers/2025-wdd/` — scoped L2 mechanism + official artifact demo CI |
 
 ## Discovery sources
 
@@ -31,12 +32,12 @@ This file separates the discovery queue from completed reproduction directories.
 - arXiv searches for newly indexed preprints
 - conference publication pages and official artifacts/GitHub repositories
 
-## Discovery note (2026-08-31)
+## Discovery note (2026-09-01)
 
-Today's fresh sweep found one 2026 item missing from the tracker: **Rethinking LLM-aided RTL Code Optimization Via Timing Logic Metamorphosis**, now listed by Yongqiang Tian's publication page as TRETS 2026. The inspectable arXiv v1 (`2507.16808`, 2025-07-22) has an older title/authorship snapshot and no official artifact surfaced in exact-title GitHub searches, so today's work explicitly separates provenance auditing from the live experiment.
+A fresh sweep of Yongqiang Tian's publication page plus recent arXiv/DBLP-oriented searches did **not** surface a new 2026 paper/preprint beyond the items already tracked through 2026-08-31. The queue therefore moved backward to an unfinished high-priority program-reduction paper: **WDD: Weighted Delta Debugging (ICSE 2025)**.
 
-The scoped L2 implements a fresh logic-operation metamorphosis, checks semantic equivalence with Icarus Verilog plus Yosys formal equivalence, and synthesizes original/mutant RTL with the current open-source toolchain. It does not rerun GPT-4, Claude-3.7-Sonnet, RTLRewriter, the 153-case benchmark, or the paper's complete PPA flow.
+WDD has an official Artifact Available/Functional package on Zenodo (`10.5281/zenodo.14301983`) containing source, 32 C + 30 XML benchmarks, scripts, raw result directories, and a documented Docker image. Today's scoped L2 implements the core weighted partitioning mechanism with a true/uniform/inverted-weight ablation, and CI additionally runs one official Perses ddmin/Wddmin C demo from the authors' Docker image. Full 62-case L3 and the 5-repeat ProbDD/WProbDD lanes remain intentionally outside default CI because the artifact documentation states that the complete experiments take very long.
 
 ## Next queue
 
-Re-scan 2026 first. If no new item appears, continue backward into the highest-priority unfinished compiler/testing/program-reduction paper, starting with 2025 program-reduction work such as Latra / syntax-guided transformations / probabilistic or weighted delta debugging.
+Re-scan 2026 first. If no new item appears, continue with **Latra: A Template-Based Language-Agnostic Transformation Framework for Effective Program Reduction**, then **Boosting Program Reduction with the Missing Piece of Syntax-Guided Transformations**, then probabilistic-delta-debugging work.
