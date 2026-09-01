@@ -44,6 +44,7 @@ The repository should never call an L1 result a full reproduction.
 | 2026-08-29 | [TEMPLATEFUZZ: Fine-Grained Chat Template Fuzzing for Jailbreaking and Red Teaming LLMs](papers/2026-templatefuzz/) | arXiv 2026 preprint | L0 artifact/interface audit + scoped L2 safe mechanism | `paper-templatefuzz.yml` |
 | 2026-08-30 | [Enhancing Differential Testing with LLMs for Testing Deep Learning Libraries (DLLens)](papers/2026-dllens/) | ACM TOSEM 35(4), 2026 | L1 partial + L0 implementation audit | `paper-dllens.yml` |
 | 2026-08-31 | [Rethinking LLM-aided RTL Code Optimization Via Timing Logic Metamorphosis](papers/2026-rtl-timing-metamorphosis/) | ACM TRETS 2026 (author page); public arXiv v1 2025 | L0 provenance audit + scoped L2 logic metamorphosis | `paper-rtl-timing-metamorphosis.yml` |
+| 2026-09-01 | [Latra: A Template-Based Language-Agnostic Transformation Framework for Effective Program Reduction](papers/2025-latra/) | ASE 2025 | L1 + scoped L2 target | `paper-latra.yml` |
 
 ## Daily workflow
 
