@@ -30,7 +30,11 @@ jobs:
           path: papers/2025-latra/results/
           if-no-files-found: error
 
+  # The official Docker image is large enough that pulling it dominates a normal
+  # PR check. Keep the deterministic L1 lane automatic and retain this exact
+  # official-artifact L2 probe as a reproducible manual lane.
   l2-official-smoke:
+    if: github.event_name == 'workflow_dispatch'
     needs: l1-reported-results
     runs-on: ubuntu-latest
     timeout-minutes: 25
