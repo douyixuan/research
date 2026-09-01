@@ -44,6 +44,10 @@ def assert_close(actual: float, expected: float, tolerance: float = 0.02) -> Non
         raise AssertionError(f"expected {expected:.2f}, got {actual:.4f}")
 
 
+def rounded_means(rows: list[dict[str, str]]) -> dict[str, int]:
+    return {col: round(mean(rows, col)) for col in ("Vulcan", "ddSMT", "Latra")}
+
+
 def main() -> None:
     c_rows = fetch_csv("c")
     smt_tokens = fetch_csv("smt_tokens")
@@ -52,7 +56,7 @@ def main() -> None:
 
     report = {
         "artifact_commit": ARTIFACT_COMMIT,
-        "level": "L1-reported-results",
+        "level": "L1-reported-results-partial",
         "c_cases": len(c_rows),
         "smt_cases": len(smt_tokens),
         "c": {
@@ -62,37 +66,38 @@ def main() -> None:
             "avg_per_case_token_gain_vs_vulcan_pct": avg_relative_gain(c_rows, "Vulcan", "Latra"),
         },
         "smt": {
-            "mean_tokens_vulcan": mean(smt_tokens, "Vulcan"),
-            "mean_tokens_ddsmt": mean(smt_tokens, "ddSMT"),
-            "mean_tokens_latra": mean(smt_tokens, "Latra"),
             "avg_per_case_token_gain_vs_vulcan_pct": avg_relative_gain(smt_tokens, "Vulcan", "Latra"),
             "avg_per_case_time_gain_vs_vulcan_pct": avg_relative_gain(smt_time, "Vulcan", "Latra"),
-            "mean_queries_vulcan": mean(smt_queries, "Vulcan"),
-            "mean_queries_ddsmt": mean(smt_queries, "ddSMT"),
-            "mean_queries_latra": mean(smt_queries, "Latra"),
-            "paper_reported_mean_tokens": {"Vulcan": 121, "ddSMT": 109, "Latra": 103},
+            "csv_mean_tokens": {col: mean(smt_tokens, col) for col in ("Vulcan", "ddSMT", "Latra")},
+            "csv_mean_queries": {col: mean(smt_queries, col) for col in ("Vulcan", "ddSMT", "Latra")},
+            "csv_mean_time": {col: mean(smt_time, col) for col in ("Vulcan", "ddSMT", "Latra")},
+            "csv_rounded_mean_tokens": rounded_means(smt_tokens),
+            "csv_rounded_mean_queries": rounded_means(smt_queries),
+            "csv_rounded_mean_time": rounded_means(smt_time),
+            "paper_figure4_rounded_means": {
+                "tokens": {"Vulcan": 121, "ddSMT": 109, "Latra": 103},
+                "queries": {"Vulcan": 23708, "ddSMT": 2600, "Latra": 26048},
+                "time": {"Vulcan": 1360, "ddSMT": 230, "Latra": 733},
+            },
+            "paper_reported_time_gain_vs_vulcan_pct": 32.27,
         },
     }
 
-    # Claims that can be reproduced exactly from the released CSV rows.
+    # Claims exactly recoverable from the public CSV snapshot.
     assert len(c_rows) == 20
     assert len(smt_tokens) == 205
     assert_close(report["c"]["avg_per_case_token_gain_vs_vulcan_pct"], 33.77)
     assert round(report["c"]["mean_tokens_latra"]) == 89
     assert round(report["c"]["mean_tokens_creduce"]) == 85
     assert_close(report["smt"]["avg_per_case_token_gain_vs_vulcan_pct"], 9.17)
-    assert_close(report["smt"]["avg_per_case_time_gain_vs_vulcan_pct"], 32.27)
 
-    # Preserve, rather than hide, any discrepancy between the released CSV
-    # snapshot and the integer summary printed in the paper.
-    report["smt"]["rounded_csv_mean_tokens"] = {
-        "Vulcan": round(report["smt"]["mean_tokens_vulcan"]),
-        "ddSMT": round(report["smt"]["mean_tokens_ddsmt"]),
-        "Latra": round(report["smt"]["mean_tokens_latra"]),
+    report["smt"]["figure4_matches_public_csv"] = {
+        metric: report["smt"][f"csv_rounded_mean_{metric}"] == expected
+        for metric, expected in report["smt"]["paper_figure4_rounded_means"].items()
     }
-    report["smt"]["mean_summary_matches_paper"] = (
-        report["smt"]["rounded_csv_mean_tokens"] == report["smt"]["paper_reported_mean_tokens"]
-    )
+    report["smt"]["time_gain_matches_32_27"] = abs(
+        report["smt"]["avg_per_case_time_gain_vs_vulcan_pct"] - 32.27
+    ) <= 0.02
 
     RESULTS.mkdir(parents=True, exist_ok=True)
     (RESULTS / "l1-report.json").write_text(json.dumps(report, indent=2) + "\n")
