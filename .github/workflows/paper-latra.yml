@@ -1,0 +1,37 @@
+name: paper-latra
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'papers/2025-latra/**'
+      - '.github/workflows/paper-latra.yml'
+  pull_request:
+    paths:
+      - 'papers/2025-latra/**'
+      - '.github/workflows/paper-latra.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  reproduce:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v6
+      - name: Install JDK for current Perses/Bazel
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y openjdk-21-jdk
+          java -version
+      - name: Recompute published evidence and run live Latra tests
+        run: bash papers/2025-latra/reproduce.sh
+      - name: Publish reproduction evidence
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: latra-reproduction-results
+          path: papers/2025-latra/results/
+          if-no-files-found: error
