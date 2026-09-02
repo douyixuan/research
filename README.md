@@ -28,7 +28,7 @@ The repository should never call an L1 result a full reproduction.
 | Date added | Paper | Venue | Current level | CI |
 |---|---|---|---|---|
 | 2026-08-15 | [LPO: Discovering Missed Peephole Optimizations with Large Language Models](papers/2026-lpo/) | ASPLOS 2026 | L1 | `paper-lpo.yml` ✅ |
-| 2026-08-16 | [PROJ: Semantic-aware and Self-improving Program Reduction via Agentic LLMs](papers/2026-proj/) | arXiv 2026 preprint | L0 + claim audit | `paper-proj.yml` |
+| 2026-08-16 | [PROJ: Semantic-aware and Self-improving Program Reduction via Agentic LLMs](papers/2026-proj/) | arXiv 2026 preprint | L0 claim audit + scoped L2 control mechanism | `paper-proj.yml` + manual `paper-proj-live.yml` |
 | 2026-08-17 | [CrossLangFuzzer: Differential Testing of Cross-Language JVM Compilers](papers/2026-crosslangfuzzer/) | arXiv 2026 preprint / SPLASH-ISSTA 2026 Tool Demo | L2 scoped live bug reproduction | `paper-crosslangfuzzer.yml` ✅ |
 | 2026-08-18 | [OATest: Optimization-Aware Test Generation for Deep Learning Compilers](papers/2026-oatest/) | ICSE 2026 | L1 | `paper-oatest.yml` ✅ |
 | 2026-08-19 | [VIZDETOUR: Detecting Rendering Bugs in Imperative Data Visualization Libraries via Equivalent Mutations](papers/2026-vizdetour/) | arXiv 2026 preprint | L1 + scoped L2 | `paper-vizdetour.yml` ✅ |
