@@ -1,0 +1,29 @@
+name: paper-proj-live
+
+on:
+  workflow_dispatch:
+
+jobs:
+  live-llm-scoped-l2:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 20
+    env:
+      PROJ_LLM_ENDPOINT: ${{ secrets.PROJ_LLM_ENDPOINT }}
+      PROJ_LLM_API_KEY: ${{ secrets.PROJ_LLM_API_KEY }}
+      PROJ_LLM_MODEL: ${{ secrets.PROJ_LLM_MODEL }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate live LLM configuration
+        run: |
+          test -n "$PROJ_LLM_ENDPOINT" || { echo 'missing PROJ_LLM_ENDPOINT'; exit 2; }
+          test -n "$PROJ_LLM_API_KEY" || { echo 'missing PROJ_LLM_API_KEY'; exit 2; }
+          test -n "$PROJ_LLM_MODEL" || { echo 'missing PROJ_LLM_MODEL'; exit 2; }
+      - name: Run live reducer + reflector + held-out replay
+        run: python3 papers/2026-proj/live_l2_scaffold.py
+      - name: Upload live trace
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: proj-live-l2-report
+          path: papers/2026-proj/results/live_l2.json
+          if-no-files-found: ignore
