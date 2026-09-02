@@ -1,0 +1,55 @@
+name: paper-sfc
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'papers/2025-sfc/**'
+      - '.github/workflows/paper-sfc.yml'
+  pull_request:
+    paths:
+      - 'papers/2025-sfc/**'
+      - '.github/workflows/paper-sfc.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  scoped-l2:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - name: Checkout reproduction repository
+        uses: actions/checkout@v4
+
+      - name: Checkout pinned official Perses source
+        uses: actions/checkout@v4
+        with:
+          repository: uw-pluverse/perses
+          ref: 6c6ae0db20fa83b0f85a71ca447f0c4d5e056bd2
+          path: upstream
+
+      - name: Cache Bazel
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/bazel
+          key: sfc-bazel-${{ runner.os }}-9.1.0-${{ hashFiles('upstream/MODULE.bazel', 'upstream/.bazelversion') }}
+          restore-keys: |
+            sfc-bazel-${{ runner.os }}-9.1.0-
+
+      - name: Run official SFC mechanism tests
+        run: bash papers/2025-sfc/reproduce.sh upstream
+
+      - name: Show reproduction summary
+        if: always()
+        run: |
+          test -f papers/2025-sfc/results/summary.json && cat papers/2025-sfc/results/summary.json || true
+
+      - name: Upload logs and result summary
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sfc-reproduction-results
+          path: papers/2025-sfc/results/
+          if-no-files-found: warn
