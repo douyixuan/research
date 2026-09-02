@@ -51,13 +51,13 @@ Passing them demonstrates a fresh, executable **scoped L2 mechanism reproduction
 Prerequisites: Git, Java and Bazelisk. The CI checks out the pinned upstream revision automatically.
 
 ```bash
-./papers/2025-sfc/reproduce.sh
+bash papers/2025-sfc/reproduce.sh
 ```
 
 For an already checked-out upstream tree:
 
 ```bash
-./papers/2025-sfc/reproduce.sh /path/to/perses
+bash papers/2025-sfc/reproduce.sh /path/to/perses
 ```
 
 The script writes `papers/2025-sfc/results/summary.json` and per-target Bazel logs. CI uploads the entire results directory as an artifact.
