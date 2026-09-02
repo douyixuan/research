@@ -3,122 +3,149 @@
 Paper: Xintong Zhou, Hongxu Xu, Chunhao Liao, Puzhuo Liu, Yongqiang Tian, Chengnian Sun. arXiv:2607.03766v1, 4 Jul 2026.
 
 - Paper: https://arxiv.org/abs/2607.03766
-- Current status: **L0 structural + deterministic claim audit**. This is **not** a full PROJ reproduction.
-- Public artifact status (checked 2026-08-16): the arXiv v1 paper does not provide a PROJ repository/artifact link, and a targeted GitHub repository search did not locate an official implementation. Therefore L2/L3 is blocked on implementation/benchmark release or an independent reimplementation with an LLM backend.
+- Rechecked: **2026-09-02**
+- Current status: **L0 claim audit + scoped L2 control-mechanism reproduction**.
+- This is **not L1**, because the paper's raw 90-benchmark result artifact is not public.
+- This is **not a faithful model-driven L2/L3 PROJ rerun**, because the public paper still does not expose an official PROJ repository/artifact and the deterministic lane replaces the LLM reducer/reflector with scripted stand-ins.
 
 ## Core insight
 
-PROJ treats program reduction as a feedback-controlled reasoning task rather than a fixed transformation pipeline. A reducer agent proposes case-specific edits; a deterministic harness runs the bug/property checker before accepting them. After a reduction, a reflector agent distills successful edits into executable, language-specific strategies that are replayed deterministically on future programs.
+PROJ turns program reduction into a feedback-controlled reasoning loop rather than a fixed transformation pipeline:
 
-The important architectural split is therefore:
+`proposal -> executable property checker -> feedback -> accepted experience -> reflector -> reusable learned reducer`
 
-`LLM proposes -> executable property checker decides -> accepted experience -> reflector -> executable learned reducer`
-
-This is stronger than prompt-only memory because learned experience becomes testable code guarded by the original property oracle.
+The important separation is that the model proposes transformations but the property checker is the source of truth. Successful nondeterministic reasoning is then distilled into deterministic, executable strategies that can be replayed on later cases.
 
 ## Paper experiment design
 
-The paper evaluates 90 bug-triggering programs: 60 C, 20 Rust, and 10 JavaScript. The C set is split into 30 training and 30 held-out cases. The default model is DeepSeek-V4-Flash. PROJ uses up to three sessions with attempt budgets 60/50/40 and compares against Perses, Vulcan, LPR, and C-Reduce. The RQ1 sequence is shuffled and repeated three times so later cases can benefit from strategies learned from earlier cases.
+The paper evaluates 90 bug-triggering programs: 60 C, 20 Rust, and 10 JavaScript. The C set is split into 30 training and 30 held-out cases. The default model is DeepSeek-V4-Flash; the paper also studies alternate models and agent-loop ablations. Baselines include Perses, Vulcan, LPR, and C-Reduce.
 
-Primary metrics:
+Primary claims/metrics:
 
-- effectiveness: final lexical token count;
-- efficiency: reduction time;
-- LLM cost: API dollars;
-- RQ2: contribution/generalization of the learned reducer;
-- RQ3: loop-structure, exploration-mode, model, and agent-harness ablations.
+- final lexical token count;
+- reduction wall time and LLM cost;
+- learned-reducer contribution/generalization;
+- exploration/default-loop ablations;
+- model and harness robustness.
+
+## Artifact status
+
+A fresh 2026-09-02 search of the arXiv entry and targeted GitHub queries still found no official PROJ implementation or benchmark release. The public paper gives the architecture, experimental setup, and aggregate results, but not the raw 90-case result bundle needed for a real L1 recomputation.
+
+Therefore the repository keeps two different lanes:
+
+1. deterministic CI-safe architecture reproduction (`pipeline_l2.py`);
+2. a manual live-LLM scaffold (`live_l2_scaffold.py`) that can be enabled once an API endpoint/key is supplied.
 
 ## Paper vs. our evidence
 
-| Claim | Paper | This repo | Status |
+| Claim | Paper | This repo | Level/status |
 |---|---|---|---|
-| PROJ beats best baseline on final size | 39.0% C, 36.0% Rust, 38.9% JS | `check_reported_claims.py` recomputes ratio-of-suite-means: 39.1%, 36.0%, 38.7% | consistent; not raw-run reproduction |
-| learned reducer is executable and property-guarded | strategies are executable passes checked by the property oracle | `mini_proj.py` independently implements the invariant on a toy C case | architecture smoke only |
-| learned reducer generalizes | held-out C: learned reducer alone reaches ~159 tokens; full PROJ ~89 | not rerun | blocked |
-| agentic PROJ beats C-Reduce / LPR | 90-benchmark study | not rerun | blocked |
-| model robustness | DeepSeek-V4-Flash / MiMo-V2.5 / MiniMax-M3 similar | not rerun | blocked |
+| PROJ beats best baseline on final size | 39.0% C, 36.0% Rust, 38.9% JS | `check_reported_claims.py` recomputes ratio-of-suite-means: 39.1%, 36.0%, 38.7% | L0 consistency audit only |
+| every accepted reduction is property-checked | external checker guards proposals | live compilation/execution rejects a deliberately property-breaking proposal | scoped L2 mechanism |
+| exploration can temporarily grow the program | exploration mode is allowed to escape local minima | controlled run accepts a 74 -> 75 token exploratory rewrite, then reduces further | scoped L2 mechanism |
+| successful experience becomes a reusable reducer | reflector emits executable strategies | deterministic reflector keeps two generic strategies and replays them on a differently named held-out fixture | scoped L2 mechanism |
+| learned reducer generalizes on held-out compiler bugs | paper reports held-out C benefits | controlled held-out C fixture shrinks 79 -> 44 tokens | mechanism only; not paper benchmark |
+| full PROJ beats Perses/Vulcan/LPR/C-Reduce on 90 bugs | paper-scale study | not rerun | blocked |
 
-The slight C/JS arithmetic differences above are expected: the compact audit only has the Table-II suite means, while the table's percentage column is averaged per case. This audit checks consistency, not exact raw-data reconstruction.
+The compact aggregate audit is deliberately not called L1: it lacks the paper's raw per-case outputs and cannot reconstruct mean-of-per-case percentage changes exactly.
 
-## Deterministic run
+## Scoped L2 experiment executed on 2026-09-02
+
+`pipeline_l2.py` independently reimplements the control architecture on fresh controlled C programs. It does **not** claim to reimplement the authors' model prompts or benchmark suite.
+
+Training fixture:
+
+- starts at **95 lexical tokens**;
+- property oracle compiles with `cc -std=c11 -O2`, executes the binary, and requires exact stdout `TRIGGER:42`;
+- a deliberately destructive proposal is rejected by the oracle;
+- an exploration proposal temporarily grows **74 -> 75** tokens and is accepted because the property still holds;
+- later simplifications finish at **44 tokens** (**53.68% smaller**);
+- local execution used **8 oracle calls**.
+
+The deterministic reflector retains two name-agnostic successful strategies:
+
+- `remove_dead_helper`;
+- `inline_identity`.
+
+Those exact learned strategies are replayed to a fixpoint on a differently named held-out fixture. The held-out program shrinks **79 -> 44 tokens** (**44.30% smaller**) while preserving the executable property; local execution used **5 oracle calls**.
+
+This exercises the full control chain:
+
+`propose -> reject/accept via oracle -> exploration -> feedback -> distill -> held-out replay -> oracle`
+
+Because reducer and reflector proposals are scripted rather than generated by an LLM, the result is recorded as **scoped L2 mechanism**, not a faithful PROJ L2.
+
+## Deterministic reproduction
 
 ```bash
 bash papers/2026-proj/reproduce.sh
 ```
 
-It performs two CI-safe checks:
+It runs:
 
-1. audits the headline effectiveness claim against the published Table-II suite means;
-2. compiles and executes a toy C program after every candidate rewrite, showing the paper's central safety invariant: a rewrite becomes durable only after the executable property checker accepts it.
+1. aggregate reported-claim consistency audit;
+2. the older minimal property-guard smoke;
+3. the new scoped L2 control pipeline;
+4. JSON event-trace generation at `results/pipeline_l2.json`.
 
-Expected independent smoke result currently reduces the toy program from 66 lexical tokens to 34 while preserving output `7`.
+GitHub Actions: `.github/workflows/paper-proj.yml` uploads both the Markdown report and the JSON event trace.
 
-## What is missing for L2
+## Manual live-LLM scaffold
 
-A faithful minimal live run needs:
+`live_l2_scaffold.py` is an executable next-step scaffold for an OpenAI-compatible chat-completions endpoint. It asks a real model to propose C reductions, feeds property-checker feedback back into the loop, asks a reflector call for one conservative regex strategy, and validates that strategy on the held-out fixture.
 
-1. official PROJ code or an independent reducer-agent harness;
-2. at least one original bug-triggering benchmark plus its exact property checker/toolchain;
-3. Perses pre-reduction;
-4. an LLM compatible with the paper's tool-call loop;
-5. reflector-generated executable strategies and their verification fixtures.
+Required repository secrets for `.github/workflows/paper-proj-live.yml`:
 
-The paper used DeepSeek-V4-Flash and an Ubuntu 22.04 server with Intel Xeon 6348 CPUs. Exact paper-scale L3 additionally requires all 90 benchmarks, compiler versions, baseline configurations, random orderings, three repeated runs, and model/API-version pinning.
+- `PROJ_LLM_ENDPOINT` — full chat-completions endpoint;
+- `PROJ_LLM_API_KEY` — API credential;
+- `PROJ_LLM_MODEL` — pinned model identifier/revision.
 
-## Most useful reproduction plan
+The live workflow is manual-only because model/provider drift makes it nondeterministic. It has not been run in this repository because those secrets are not available to this automation.
 
-### L2 — one real compiler bug
+## What blocks a faithful L2
 
-Pick one C/Clang benchmark whose historical compiler can be containerized. Run:
+A paper-faithful minimal run still needs:
 
-`Perses -> learned reducer(empty) -> reducer agent -> property checker -> reflector -> learned reducer`
+1. official PROJ source or a substantially closer independent agent harness;
+2. at least one original bug-triggering benchmark plus exact property checker/toolchain;
+3. Perses pre-reduction as used by the paper;
+4. a pinned LLM revision and exact reducer/reflector prompt/tool schemas;
+5. the reflector verification protocol and learned-strategy persistence format.
 
-Acceptance criteria:
+To promote to strict L2, use one real compiler benchmark and run the entire chain with a real LLM while recording every model response, accepted/rejected candidate, oracle invocation, toolchain digest, token count, latency, and API cost.
 
-- every accepted edit still triggers the bug;
-- final size is smaller than Perses alone;
-- complete accepted/rejected trajectory is recorded;
-- replaying the learned strategy is deterministic;
-- a second unrelated fixture tests that the strategy is not case-overfit.
+To promote to L3, reproduce all 90 programs with the paper's C train/held-out split, Rust/JS suites, baselines, random orderings, repeated runs, and model/provider revision pinning.
 
-### L3 — paper-scale
+## Threats and limitations
 
-Recreate the 30/30 C split plus Rust/JS suites, pin compiler/container hashes, randomize benchmark order, repeat >=3 times, and compare token count/time/cost to Perses, Vulcan, LPR, and C-Reduce.
+1. **Benchmark leakage.** Existing reducer benchmarks are public and may appear in model training data. A strong extension should use bugs filed after the model's training cutoff.
+2. **Model drift.** A model name alone is insufficient. Log revision/date, prompt/tool schema, temperature, raw response, tokens, latency, and cost.
+3. **Order sensitivity.** PROJ intentionally transfers learned strategies from earlier to later cases. Report distributions over multiple curricula, not only one order.
+4. **Oracle cost.** Compiler/property checks can dominate runtime; measure oracle-call count separately from wall time.
+5. **Strategy interference.** A growing learned reducer can introduce ordering/fixpoint conflicts. Measure per-strategy precision, coverage, and marginal token savings.
+6. **Generated-code safety.** Paper-style executable learned strategies should run with restricted filesystem/network access and be fuzz-tested before reuse.
+7. **Our scoped-L2 bias.** The controlled fixtures make generalization easy and do not test real compiler failures, flaky oracles, giant inputs, or LLM semantic reasoning.
 
-## Threats / questions worth testing
+## Most valuable extension
 
-1. **Benchmark leakage.** Many cases come from prior public reducer work. Modern LLMs may have seen both bugs and reduced forms. Re-run on post-training, newly filed compiler bugs.
-2. **Model drift.** API names are not enough for reproducibility. Record provider model revision, date, prompt/tool schema, temperature, token counts, and raw responses.
-3. **Order sensitivity.** RQ1 intentionally lets earlier cases teach later cases. Report distributions across many orderings and isolate how much benefit comes from lucky curriculum order.
-4. **Mean-of-ratios vs ratio-of-means.** Publish raw per-case data and bootstrap confidence intervals; aggregate percentages can obscure hard regressions such as cases where PROJ is worse than C-Reduce.
-5. **Executable-skill safety.** The reflector writes executable Python reduction passes. Run learned skills in a sandbox, restrict filesystem/network access, and fuzz the generated transforms themselves.
-6. **Oracle cost.** Token size is only one objective. Compiler bug oracles can dominate runtime; measure number of property-check invocations separately from wall time.
-7. **Strategy interference.** A growing learned reducer can create ordering conflicts. Test strategy ordering, fixpoint stability, and whether older skills degrade newer workloads.
+### Fresh compiler bugs + strategy ROI
 
-## Extension experiments
+Use post-training LLVM/GCC bugs and compare:
 
-### A. Fresh-bug evaluation
-
-Use compiler bugs filed after the model's training cutoff. This is the cleanest test of semantic reasoning versus memorization/leakage.
-
-### B. Harness > model hypothesis
-
-The paper suggests the specialized harness matters more than model choice. Hold one current model fixed and compare:
-
+- Perses/Vulcan baseline;
 - free-form coding agent;
-- PROJ-style property-checked loop;
-- PROJ-style loop + learned reducer.
+- property-checked PROJ-style loop;
+- loop + learned reducer.
 
-Measure final tokens, oracle calls, dollars, accepted-edit rate, and invalid-candidate rate.
+For every learned strategy record:
 
-### C. Distillation quality
+- accepted applications / attempted applications;
+- token savings;
+- oracle calls avoided or added;
+- wall time and API cost;
+- regressions/failures on held-out bugs.
 
-For every learned strategy, evaluate precision (property-preserving applications / attempted applications), coverage on held-out programs, token savings, and amortized LLM cost. Delete strategies whose maintenance cost exceeds benefit.
+The key question is whether self-improvement still exists after controlling for **benchmark memorization, model drift, oracle cost, and curriculum order**.
 
-### D. Compiler-aware learned reducer
-
-For LLVM/GCC bugs, augment the reflector with AST/IR facts instead of pure text rewriting. A promising direction is to synthesize transformations over Clang AST or LLVM IR and validate them with compilation plus Alive2 where applicable.
-
-## Current conclusion
-
-The paper's strongest idea is not simply "LLM reduces code"; it is the conversion of nondeterministic successful reasoning into deterministic, executable, property-guarded reduction knowledge. The main reproduction risk is currently artifact availability, so this directory deliberately stops at L0 plus claim/architecture checks rather than overstating the result.
+A compiler-specific follow-up should distill strategies over Clang AST or LLVM IR rather than raw text and validate semantic rewrites with compilation plus Alive2 when applicable.
