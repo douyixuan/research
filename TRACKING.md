@@ -1,6 +1,6 @@
 # Yongqiang Tian paper tracker
 
-Last public-source sweep: **2026-09-01**.
+Last public-source sweep: **2026-09-02**.
 
 This file separates the discovery queue from completed reproduction directories. It intentionally includes preprints and tool demonstrations that may not yet be prominent in Scholar/DBLP so they do not get lost between daily runs.
 
@@ -23,7 +23,8 @@ This file separates the discovery queue from completed reproduction directories.
 | Semantic-aware and Self-improving Program Reduction via Agentic Large Language Models (PROJ) | arXiv 2607.03766, 2026-07-04 | ✅ `papers/2026-proj/` |
 | VIZDETOUR: Detecting Rendering Bugs in Imperative Data Visualization Libraries via Equivalent Mutations | 2026 preprint | ✅ `papers/2026-vizdetour/` |
 | Enhancing Differential Testing with LLMs for Testing Deep Learning Libraries | ACM TOSEM 35(4), Article 88, Apr 2026; author page lists TOSEM 2025 | ✅ `papers/2026-dllens/` — L1 partial + L0 implementation audit |
-| Latra: A Template-Based Language-Agnostic Transformation Framework for Effective Program Reduction | ASE 2025 | 🔄 PR #17 — `papers/2025-latra/`, L1 partial + official L2 probe |
+| Latra: A Template-Based Language-Agnostic Transformation Framework for Effective Program Reduction | ASE 2025 | ✅ `papers/2025-latra/` — L1 partial + official L2 probe scaffold |
+| Boosting Program Reduction with the Missing Piece of Syntax-Guided Transformations (SFC) | OOPSLA 2025 | 🔄 `papers/2025-sfc/` — L0 implementation audit + scoped L2 mechanism |
 
 ## Discovery sources
 
@@ -32,12 +33,12 @@ This file separates the discovery queue from completed reproduction directories.
 - arXiv searches for newly indexed preprints
 - conference publication pages and official artifacts/GitHub repositories
 
-## Discovery note (2026-09-01)
+## Discovery note (2026-09-02)
 
-A fresh public-source sweep did not surface a newer 2026 Yongqiang Tian compiler/testing/program-reduction paper beyond the already tracked July preprints and current publication-page entries. Following the priority rule, today's study moved backward to **Latra (ASE 2025)**, which has an official public artifact and directly informs DRReduce/PROJ/LPR+ style reduction work.
+A fresh public-source sweep did not surface a newer 2026 Yongqiang Tian paper beyond the already tracked publication-page entries and July preprints. The author homepage's newest dated item is an August 2026 teaching grant, not a paper. Following the priority rule, today's study therefore moved to **Boosting Program Reduction with the Missing Piece of Syntax-Guided Transformations (OOPSLA 2025)**.
 
-The public Latra artifact reproduces the headline per-case token improvements (33.77% C, 9.17% SMT-LIB) and the paper-style SMT token means, but its post-publication Latra query/time CSV columns differ materially from Figure 4. The study records that snapshot drift instead of treating current artifact outputs as identical to the paper-era experiment.
+The current official Perses repository now contains a dedicated `sfc/` implementation. Its `PaperExampleSimplificationsTest` explicitly reproduces the twelve Section 4.1 examples on the real C grammar, and functional tests cover Smaller Structure Replacement, Identifier Elimination, and Structure Canonicalization. Today's reproduction pins the 2026-08-27 Perses commit and runs those official tests as a scoped L2 mechanism check. No paper-era raw benchmark tables/results were found, so the paper's aggregate C/Rust/SMT and deduplication numbers are not labeled L1.
 
 ## Next queue
 
-Re-scan 2026 first. If no new item appears, next priority is **Boosting Program Reduction with the Missing Piece of Syntax-Guided Transformations** (OOPSLA 2025), then weighted/probabilistic delta debugging work.
+Re-scan 2026 first. If no new item appears, next priority is **WDD: Weighted Delta Debugging** / probabilistic delta debugging work, then earlier program-reduction papers with executable artifacts.
