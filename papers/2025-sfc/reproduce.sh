@@ -38,9 +38,11 @@ targets=(
 )
 
 printf 'upstream_sha=%s\n' "${actual_sha}" | tee "${RESULTS_DIR}/metadata.txt"
-printf 'bazel=%s\n' "$(${bazel_cmd} --version 2>/dev/null || true)" | tee -a "${RESULTS_DIR}/metadata.txt"
 
+# Query Bazel from inside the pinned upstream workspace so Bazelisk honors
+# Perses' .bazelversion rather than whichever version is current outside it.
 pushd "${UPSTREAM_DIR}" >/dev/null
+printf 'bazel=%s\n' "$(${bazel_cmd} --version 2>/dev/null || true)" | tee -a "${RESULTS_DIR}/metadata.txt"
 passed=0
 for target in "${targets[@]}"; do
   safe_name="$(echo "${target##*:}" | tr -cd '[:alnum:]_-')"
