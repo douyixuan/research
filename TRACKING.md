@@ -1,6 +1,6 @@
 # Yongqiang Tian paper tracker
 
-Last public-source sweep: **2026-09-01**.
+Last public-source sweep: **2026-09-02**.
 
 This file separates the discovery queue from completed reproduction directories. It intentionally includes preprints and tool demonstrations that may not yet be prominent in Scholar/DBLP so they do not get lost between daily runs.
 
@@ -20,10 +20,10 @@ This file separates the discovery queue from completed reproduction directories.
 | DRReduce: Enhancing Syntax-Guided Program Reduction with Dependency Reconstruction | arXiv 2605.19412, 2026-05-19 | ✅ `papers/2026-drreduce/` — scoped L1 + scoped L2 |
 | CrossLangFuzzer: Differential Testing of Cross-Language JVM Compilers | arXiv 2606.28132 + SPLASH/ISSTA 2026 Tool Demo | ✅ `papers/2026-crosslangfuzzer/` |
 | Delta Debugging in the Absence of Test Oracles Through Metamorphic Testing (DDMT) | arXiv 2607.00929, 2026-07-01 | ✅ `papers/2026-ddmt/` — scoped L1 + scoped L2 mechanism |
-| Semantic-aware and Self-improving Program Reduction via Agentic Large Language Models (PROJ) | arXiv 2607.03766, 2026-07-04 | ✅ `papers/2026-proj/` |
+| Semantic-aware and Self-improving Program Reduction via Agentic Large Language Models (PROJ) | arXiv 2607.03766, 2026-07-04 | ✅ `papers/2026-proj/` — L0 claim audit + scoped L2 control mechanism; live-LLM lane scaffolded |
 | VIZDETOUR: Detecting Rendering Bugs in Imperative Data Visualization Libraries via Equivalent Mutations | 2026 preprint | ✅ `papers/2026-vizdetour/` |
 | Enhancing Differential Testing with LLMs for Testing Deep Learning Libraries | ACM TOSEM 35(4), Article 88, Apr 2026; author page lists TOSEM 2025 | ✅ `papers/2026-dllens/` — L1 partial + L0 implementation audit |
-| Latra: A Template-Based Language-Agnostic Transformation Framework for Effective Program Reduction | ASE 2025 | 🔄 PR #17 — `papers/2025-latra/`, L1 partial + official L2 probe |
+| Latra: A Template-Based Language-Agnostic Transformation Framework for Effective Program Reduction | ASE 2025 | ✅ `papers/2025-latra/` — L1 partial + official L2 probe scaffold |
 
 ## Discovery sources
 
@@ -32,11 +32,11 @@ This file separates the discovery queue from completed reproduction directories.
 - arXiv searches for newly indexed preprints
 - conference publication pages and official artifacts/GitHub repositories
 
-## Discovery note (2026-09-01)
+## Discovery note (2026-09-02)
 
-A fresh public-source sweep did not surface a newer 2026 Yongqiang Tian compiler/testing/program-reduction paper beyond the already tracked July preprints and current publication-page entries. Following the priority rule, today's study moved backward to **Latra (ASE 2025)**, which has an official public artifact and directly informs DRReduce/PROJ/LPR+ style reduction work.
+A fresh sweep of Yongqiang Tian's publication page, arXiv/DBLP indexing, and targeted GitHub searches did not surface a newer 2026 compiler/testing/program-reduction paper beyond the already tracked July preprints. PROJ remained the highest-priority unfinished 2026 program-reduction item because its previous directory stopped at L0 plus a toy architecture smoke.
 
-The public Latra artifact reproduces the headline per-case token improvements (33.77% C, 9.17% SMT-LIB) and the paper-style SMT token means, but its post-publication Latra query/time CSV columns differ materially from Figure 4. The study records that snapshot drift instead of treating current artifact outputs as identical to the paper-era experiment.
+Today's upgrade adds a live compile/execute control-pipeline reproduction: proposal acceptance/rejection is guarded by an executable oracle, exploration is allowed to temporarily grow the program, successful transforms are distilled, and the same learned strategies are replayed on a differently named held-out fixture. The deterministic path is recorded as **scoped L2 mechanism**, not a faithful model-driven PROJ rerun. A manual live-LLM Action scaffold is also present but remains blocked on endpoint/key/model secrets and the absence of the authors' official artifact.
 
 ## Next queue
 
