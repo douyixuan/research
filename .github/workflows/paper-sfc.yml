@@ -17,6 +17,23 @@ permissions:
   contents: read
 
 jobs:
+  released-results-l1:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Recompute headline minimization claims from official released CSVs
+        run: python3 papers/2025-sfc/recompute_l1.py
+
+      - name: Publish L1 evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sfc-l1-released-results
+          path: papers/2025-sfc/results/l1-summary.json
+          if-no-files-found: error
+
   current-perses-sfc-mechanism:
     runs-on: ubuntu-latest
     timeout-minutes: 35
@@ -29,7 +46,7 @@ jobs:
       - name: Run pinned upstream SFC tests
         run: bash papers/2025-sfc/reproduce.sh
 
-      - name: Publish reproduction evidence
+      - name: Publish scoped L2 mechanism evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
