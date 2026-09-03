@@ -2,6 +2,7 @@ name: paper-sfc
 
 on:
   push:
+    branches: [main]
     paths:
       - "papers/2025-sfc/**"
       - ".github/workflows/paper-sfc.yml"
