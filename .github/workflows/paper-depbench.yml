@@ -1,0 +1,38 @@
+name: paper-depbench
+
+on:
+  push:
+    branches: [main, paper-2026-depbench]
+    paths:
+      - 'papers/2026-depbench/**'
+      - '.github/workflows/paper-depbench.yml'
+  pull_request:
+    paths:
+      - 'papers/2026-depbench/**'
+      - '.github/workflows/paper-depbench.yml'
+      - 'README.md'
+  workflow_dispatch:
+
+jobs:
+  reproduce:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Paper claim arithmetic audit
+        run: bash papers/2026-depbench/reproduce.sh claims
+      - name: Live js-wacz four-state oracle
+        run: bash papers/2026-depbench/reproduce.sh live
+      - name: Upload reproduction results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: depbench-reproduction-${{ github.run_id }}
+          path: papers/2026-depbench/results/
+          if-no-files-found: warn
