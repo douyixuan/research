@@ -45,7 +45,7 @@ The repository should never call an L1 result a full reproduction.
 | 2026-08-30 | [Enhancing Differential Testing with LLMs for Testing Deep Learning Libraries (DLLens)](papers/2026-dllens/) | ACM TOSEM 35(4), 2026 | L1 partial + L0 implementation audit | `paper-dllens.yml` |
 | 2026-08-31 | [Rethinking LLM-aided RTL Code Optimization Via Timing Logic Metamorphosis](papers/2026-rtl-timing-metamorphosis/) | ACM TRETS 2026 (author page); public arXiv v1 2025 | L0 provenance audit + scoped L2 logic metamorphosis | `paper-rtl-timing-metamorphosis.yml` |
 | 2026-09-01 | [Latra: A Template-Based Language-Agnostic Transformation Framework for Effective Program Reduction](papers/2025-latra/) | ASE 2025 | L1 partial; official L2 Docker lane scaffolded/manual | `paper-latra.yml` ✅ L1 |
-| 2026-09-03 | [Update from Hell: Can Coding Agents Survive Hidden Breakage in Dependency Upgrades? (DEPBENCH)](papers/2026-depbench/) | arXiv 2026 preprint | L0 claim/artifact audit + scoped L2 public-case reconstruction | `paper-depbench.yml` |
+| 2026-09-03 | [Update from Hell: Can Coding Agents Survive Hidden Breakage in Dependency Upgrades? (DEPBENCH)](papers/2026-depbench/) | arXiv 2026 preprint | L0 claim/artifact audit + scoped L2 public-case reconstruction | `paper-depbench.yml` ✅ |
 
 ## Daily workflow
 
