@@ -1,0 +1,38 @@
+name: paper-sfc
+
+on:
+  push:
+    paths:
+      - "papers/2025-sfc/**"
+      - ".github/workflows/paper-sfc.yml"
+      - "README.md"
+  pull_request:
+    paths:
+      - "papers/2025-sfc/**"
+      - ".github/workflows/paper-sfc.yml"
+      - "README.md"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  current-perses-sfc-mechanism:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Bazelisk
+        uses: bazelbuild/setup-bazelisk@v3
+
+      - name: Run pinned upstream SFC tests
+        run: bash papers/2025-sfc/reproduce.sh
+
+      - name: Publish reproduction evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sfc-current-perses-reproduction
+          path: papers/2025-sfc/results/
+          if-no-files-found: error
