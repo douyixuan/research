@@ -61,6 +61,21 @@ It then runs `npm ci && npm test` independently for all four states and asserts 
 
 This is a **scoped L2 case reconstruction**, not an official DEPBENCH release-task replay, because the official benchmark's exact packaged hidden-test task artifact is not publicly located here. It still uses the real repository, real dependency upgrade, and real upstream repair from the paper's concrete example rather than a synthetic mechanism simulation.
 
+## Observed run — 2026-09-03
+
+GitHub Actions run `33702887802` completed successfully on Ubuntu 24.04.4 with Node 20.20.2 / npm 10.8.2. The live oracle produced exactly the required state vector:
+
+| State | Expected | Actual |
+|---|---|---|
+| `b` | pass | pass |
+| `b + m + t` | fail | fail |
+| `b + m + c + t` | pass | pass |
+| `b + c + t` | fail | fail |
+
+`four_state_oracle_satisfied = true`. The workflow uploaded 8 result/log files as artifact `9874153649` (9,314 bytes; SHA-256 `f3e696a9366dd10fa2b61799fc24c32c6273f73b1293809eeef1d3fbfac78385`).
+
+The runner also warns that several pinned GitHub `actions/*` majors still target the deprecated Node 20 action runtime and are currently forced to Node 24 by GitHub. This does not affect the explicitly installed Node 20 used for the js-wacz experiment, but it is recorded as CI/toolchain drift rather than hidden.
+
 ## Experiment design
 
 The CI lane has two parts:
@@ -79,7 +94,7 @@ Generated logs and JSON summaries are uploaded as a GitHub Actions artifact. The
 | Best completed config | Codex + GPT-5.5: 104/203 (51.2%) | arithmetic check matches |
 | Visible tests green before hidden failure | 322/521 (61.8%) | arithmetic check matches |
 | Full 203-task agent evaluation | yes | not reproduced |
-| Four-state oracle | all release tasks | live reconstruction on paper's public js-wacz example |
+| Four-state oracle | all release tasks | live public-case reconstruction: pass/fail/pass/fail matched |
 | Raw official result reprocessing | paper reports results | unavailable; therefore no L1 claim |
 
 ## Threats and limitations
