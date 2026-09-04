@@ -1,0 +1,33 @@
+name: paper-sfc
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'papers/2025-sfc/**'
+      - '.github/workflows/paper-sfc.yml'
+  pull_request:
+    paths:
+      - 'papers/2025-sfc/**'
+      - '.github/workflows/paper-sfc.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  l1-minimization:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+      - name: Recompute released SFC minimization results
+        run: bash papers/2025-sfc/reproduce.sh
+      - name: Show comparison
+        run: cat papers/2025-sfc/results/l1-minimization.json
+      - name: Publish reproduction evidence
+        uses: actions/upload-artifact@v6
+        with:
+          name: sfc-l1-minimization
+          path: papers/2025-sfc/results/
+          if-no-files-found: error
