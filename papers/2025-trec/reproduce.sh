@@ -8,6 +8,7 @@ PERSES_VERSION="v2.7"
 PERSES_SHA256="1102ec7e3e601792a3c271c41ac7df52b03fca635df552500c241933c2c1e427"
 PERSES_URL="https://github.com/uw-pluverse/perses/releases/download/${PERSES_VERSION}/perses_deploy.jar"
 JAR="${PERSES_JAR:-$WORK/perses_deploy.jar}"
+MAIN_ALG="perses_node_priority_with_dfs_delta"
 
 rm -rf "$RESULTS" "$WORK/baseline" "$WORK/trec"
 mkdir -p "$RESULTS" "$WORK"
@@ -35,6 +36,7 @@ run_case() {
   if ! (
     cd "$dir"
     java -jar "$JAR" \
+      --alg "$MAIN_ALG" \
       --enable-trec "$trec" \
       --enable-vulcan false \
       --enable-latra false \
@@ -83,10 +85,14 @@ if grep -q 'ExtremelyLongIdentifierForTRecDemo' "$RESULTS/trec.c"; then
 fi
 if (( trec_bytes >= baseline_bytes )); then
   echo "Expected T-Rec output to be smaller: trec=$trec_bytes baseline=$baseline_bytes" >&2
+  echo '--- baseline ---' >&2
+  cat "$RESULTS/baseline.c" >&2
+  echo '--- trec ---' >&2
+  cat "$RESULTS/trec.c" >&2
   exit 4
 fi
 
-INPUT_BYTES="$input_bytes" BASELINE_BYTES="$baseline_bytes" TREC_BYTES="$trec_bytes" \
+INPUT_BYTES="$input_bytes" BASELINE_BYTES="$baseline_bytes" TREC_BYTES="$trec_bytes" MAIN_ALG="$MAIN_ALG" \
 python3 - <<'PY' > "$RESULTS/l2-summary.json"
 import json, os
 inp = int(os.environ['INPUT_BYTES'])
@@ -96,6 +102,7 @@ print(json.dumps({
     'level': 'scoped L2 live-minimal',
     'perses_release': 'v2.7',
     'perses_sha256': '1102ec7e3e601792a3c271c41ac7df52b03fca635df552500c241933c2c1e427',
+    'main_algorithm': os.environ['MAIN_ALG'],
     'input_bytes': inp,
     'baseline_bytes': base,
     'trec_bytes': trec,
