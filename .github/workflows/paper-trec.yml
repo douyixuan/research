@@ -1,0 +1,42 @@
+name: paper-trec
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'papers/2025-trec/**'
+      - '.github/workflows/paper-trec.yml'
+  pull_request:
+    paths:
+      - 'papers/2025-trec/**'
+      - '.github/workflows/paper-trec.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  scoped-l2:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+      - name: Environment
+        run: |
+          java -version
+          gcc --version | head -n1
+      - name: Run current-release T-Rec mechanism reproduction
+        run: bash papers/2025-trec/reproduce.sh
+      - name: Show evidence
+        run: |
+          cat papers/2025-trec/results/l2-summary.json
+          printf '\n--- baseline ---\n'
+          cat papers/2025-trec/results/baseline.c
+          printf '\n--- T-Rec ---\n'
+          cat papers/2025-trec/results/trec.c
+      - name: Publish reproduction evidence
+        uses: actions/upload-artifact@v6
+        with:
+          name: trec-scoped-l2
+          path: papers/2025-trec/results/
+          if-no-files-found: error
