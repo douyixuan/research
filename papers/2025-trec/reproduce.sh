@@ -8,9 +8,8 @@ PERSES_VERSION="v2.7"
 PERSES_SHA256="1102ec7e3e601792a3c271c41ac7df52b03fca635df552500c241933c2c1e427"
 PERSES_URL="https://github.com/uw-pluverse/perses/releases/download/${PERSES_VERSION}/perses_deploy.jar"
 JAR="${PERSES_JAR:-$WORK/perses_deploy.jar}"
-MAIN_ALG="perses_node_priority_with_dfs_delta"
 
-rm -rf "$RESULTS" "$WORK/baseline" "$WORK/trec"
+rm -rf "$RESULTS" "$WORK/direct_trec" "$WORK/modern_off" "$WORK/modern_on"
 mkdir -p "$RESULTS" "$WORK"
 
 if [[ ! -f "$JAR" ]]; then
@@ -19,14 +18,10 @@ fi
 actual_sha256="$(sha256sum "$JAR" | awk '{print $1}')"
 echo "Perses v2.7 expected SHA-256: $PERSES_SHA256"
 echo "Perses v2.7 actual   SHA-256: $actual_sha256"
-if [[ "$actual_sha256" != "$PERSES_SHA256" ]]; then
-  echo 'Perses release checksum mismatch' >&2
-  exit 10
-fi
+[[ "$actual_sha256" == "$PERSES_SHA256" ]] || { echo 'Perses release checksum mismatch' >&2; exit 10; }
 
 run_case() {
-  local label="$1"
-  local trec="$2"
+  local label="$1"; shift
   local dir="$WORK/$label"
   mkdir -p "$dir"
   cp "$PAPER_DIR/case/small.c" "$dir/small.c"
@@ -36,8 +31,7 @@ run_case() {
   if ! (
     cd "$dir"
     java -jar "$JAR" \
-      --alg "$MAIN_ALG" \
-      --enable-trec "$trec" \
+      "$@" \
       --enable-vulcan false \
       --enable-latra false \
       --enable-sfc false \
@@ -56,12 +50,9 @@ run_case() {
 
   local reduced
   reduced="$(find "$dir/out" -type f -name 'small.c' -print -quit)"
-  if [[ -z "$reduced" ]]; then
-    echo "No reduced small.c found for $label" >&2
-    find "$dir" -maxdepth 3 -type f -print >&2
-    exit 2
-  fi
+  [[ -n "$reduced" ]] || { echo "No reduced small.c found for $label" >&2; find "$dir" -maxdepth 3 -type f -print >&2; exit 2; }
   cp "$reduced" "$RESULTS/${label}.c"
+
   (
     cd "$RESULTS"
     cp "$PAPER_DIR/oracle.sh" oracle-check.sh
@@ -72,47 +63,51 @@ run_case() {
   )
 }
 
-run_case baseline false
-run_case trec true
+# Direct execution of the actual T-Rec reducer registered by v2.7.
+run_case direct_trec --alg token_canonicalizer --enable-trec false
+# Separate modern-pipeline drift probe. These are NOT paper-era Perses baselines.
+run_case modern_off --enable-trec false
+run_case modern_on --enable-trec true
 
-baseline_bytes="$(wc -c < "$RESULTS/baseline.c" | tr -d ' ')"
-trec_bytes="$(wc -c < "$RESULTS/trec.c" | tr -d ' ')"
 input_bytes="$(wc -c < "$PAPER_DIR/case/small.c" | tr -d ' ')"
+direct_bytes="$(wc -c < "$RESULTS/direct_trec.c" | tr -d ' ')"
+off_bytes="$(wc -c < "$RESULTS/modern_off.c" | tr -d ' ')"
+on_bytes="$(wc -c < "$RESULTS/modern_on.c" | tr -d ' ')"
 
-if grep -q 'ExtremelyLongIdentifierForTRecDemo' "$RESULTS/trec.c"; then
-  echo 'T-Rec did not canonicalize the long identifier' >&2
+if grep -q 'ExtremelyLongIdentifierForTRecDemo' "$RESULTS/direct_trec.c"; then
+  echo 'Direct T-Rec did not canonicalize the long identifier' >&2
   exit 3
 fi
-if (( trec_bytes >= baseline_bytes )); then
-  echo "Expected T-Rec output to be smaller: trec=$trec_bytes baseline=$baseline_bytes" >&2
-  echo '--- baseline ---' >&2
-  cat "$RESULTS/baseline.c" >&2
-  echo '--- trec ---' >&2
-  cat "$RESULTS/trec.c" >&2
-  exit 4
-fi
 
-INPUT_BYTES="$input_bytes" BASELINE_BYTES="$baseline_bytes" TREC_BYTES="$trec_bytes" MAIN_ALG="$MAIN_ALG" \
+INPUT_BYTES="$input_bytes" DIRECT_BYTES="$direct_bytes" OFF_BYTES="$off_bytes" ON_BYTES="$on_bytes" \
+DIRECT_LONG="$(grep -q 'ExtremelyLongIdentifierForTRecDemo' "$RESULTS/direct_trec.c" && echo true || echo false)" \
+OFF_LONG="$(grep -q 'ExtremelyLongIdentifierForTRecDemo' "$RESULTS/modern_off.c" && echo true || echo false)" \
+ON_LONG="$(grep -q 'ExtremelyLongIdentifierForTRecDemo' "$RESULTS/modern_on.c" && echo true || echo false)" \
 python3 - <<'PY' > "$RESULTS/l2-summary.json"
 import json, os
 inp = int(os.environ['INPUT_BYTES'])
-base = int(os.environ['BASELINE_BYTES'])
-trec = int(os.environ['TREC_BYTES'])
+direct = int(os.environ['DIRECT_BYTES'])
+off = int(os.environ['OFF_BYTES'])
+on = int(os.environ['ON_BYTES'])
+b = lambda k: os.environ[k].lower() == 'true'
 print(json.dumps({
-    'level': 'scoped L2 live-minimal',
+    'level': 'L0 + scoped L2 direct T-Rec mechanism + v2.7 pipeline drift probe',
     'perses_release': 'v2.7',
     'perses_sha256': '1102ec7e3e601792a3c271c41ac7df52b03fca635df552500c241933c2c1e427',
-    'main_algorithm': os.environ['MAIN_ALG'],
+    'direct_algorithm': 'token_canonicalizer',
     'input_bytes': inp,
-    'baseline_bytes': base,
-    'trec_bytes': trec,
-    'trec_vs_baseline_byte_reduction_pct': round((base - trec) * 100.0 / base, 4),
+    'direct_trec_bytes': direct,
+    'direct_trec_byte_change_pct_vs_input': round((inp - direct) * 100.0 / inp, 4),
+    'modern_pipeline_trec_off_bytes': off,
+    'modern_pipeline_trec_on_bytes': on,
+    'modern_pipeline_marginal_byte_delta': off - on,
+    'direct_long_identifier_still_present': b('DIRECT_LONG'),
+    'modern_off_long_identifier_still_present': b('OFF_LONG'),
+    'modern_on_long_identifier_still_present': b('ON_LONG'),
     'oracle': 'gcc -O0 compile + process exit code == 7',
-    'baseline_oracle_pass': True,
-    'trec_oracle_pass': True,
-    'long_identifier_removed_by_trec': True,
+    'all_three_oracle_pass': True,
     'auxiliary_transformers_disabled': ['vulcan', 'latra', 'sfc', 'lpr'],
-    'claim_scope': 'single synthetic C mechanism case; not paper-scale L1/L3'
+    'claim_scope': 'single synthetic C mechanism case; not L1 and not paper-scale L3'
 }, indent=2))
 PY
 
