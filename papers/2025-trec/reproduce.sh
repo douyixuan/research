@@ -32,7 +32,7 @@ run_case() {
   cp "$PAPER_DIR/oracle.sh" "$dir/oracle.sh"
   chmod +x "$dir/oracle.sh"
 
-  (
+  if ! (
     cd "$dir"
     java -jar "$JAR" \
       --alg perses \
@@ -44,12 +44,17 @@ run_case() {
       --input-file small.c \
       --output-dir out \
       >"$RESULTS/${label}.log" 2>&1
-  )
+  ); then
+    echo "Perses failed for $label; reducer log follows:" >&2
+    cat "$RESULTS/${label}.log" >&2
+    exit 11
+  fi
 
   local reduced
   reduced="$(find "$dir/out" -type f -name 'small.c' -print -quit)"
   if [[ -z "$reduced" ]]; then
     echo "No reduced small.c found for $label" >&2
+    find "$dir" -maxdepth 3 -type f -print >&2
     exit 2
   fi
   cp "$reduced" "$RESULTS/${label}.c"
