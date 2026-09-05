@@ -8,31 +8,21 @@ Official code: https://github.com/uw-pluverse/perses
 
 Fresh-run pin: Perses **v2.7** (released 2026-08-26), `perses_deploy.jar` SHA-256 `1102ec7e3e601792a3c271c41ac7df52b03fca635df552500c241933c2c1e427`.
 
-Current level: **L0 implementation/provenance audit + scoped L2 current-release mechanism probe** once the included CI lane passes. This is **not L1 or L3**: the paper-scale raw result tables are not reprocessed here, and the original benchmark suite is not rerun at paper scale.
+Current level: **L0 implementation/provenance audit + scoped L2 direct T-Rec mechanism + v2.7 pipeline-drift probe**. This is **not L1 or L3**: paper-scale raw result tables are not reprocessed and the original benchmark suite is not rerun.
 
 ## Core insight
 
-Most language-agnostic reducers treat lexer tokens as indivisible atoms. T-Rec uses the language's **lexical syntax** to reduce and canonicalize *inside* tokens. Its current Perses implementation handles:
+Most language-agnostic reducers treat lexer tokens as indivisible atoms. T-Rec uses the language's **lexical syntax** to reduce and canonicalize *inside* tokens. The current Perses implementation supports consistent identifier replacement, lexer-ATN-guided canonicalization of non-identifiers, fragment deletion and character-level reduction.
 
-- identifier canonicalization, including consistent replacement of all occurrences of a lexeme;
-- lexer-ATN-guided canonical replacement of non-identifier tokens;
-- deletion of lexer fragments when the property still holds;
-- character-level canonicalization.
-
-This attacks a local minimum that syntax-tree deletion alone cannot reach: a program may require an identifier/literal token to remain, yet the token itself can still be made much shorter.
+This attacks a local minimum that syntax-tree deletion alone cannot reach: an identifier/literal may need to remain for the property to hold, while the token itself can still be simplified.
 
 ## Paper claims used as reference, not reproduced claims
 
-The paper evaluates canonicalization on **3,796** bug-triggering C tests representing **46** GCC 4.3.0 bugs, and reports that T-Rec enables Perses/Vulcan to eliminate **1,294 / 1,315** additional duplicates. On the multi-language reduction benchmark it reports maximum average byte-size improvements of **65.52%** over Perses and **53.73%** over Vulcan for C.
+The paper evaluates canonicalization on **3,796** bug-triggering C tests representing **46** GCC 4.3.0 bugs, and reports that T-Rec enables Perses/Vulcan to eliminate **1,294 / 1,315** additional duplicates. On the multi-language benchmark it reports T-Rec-Perses byte reductions of **65.52% C / 28.34% Rust / 42.86% SMT-LIBv2**, and T-Rec-Vulcan reductions of **53.73% / 19.79% / 16.24%**.
 
-For the three multi-language groups, the paper reports T-Rec-Perses byte reductions of approximately **65.52% C / 28.34% Rust / 42.86% SMT-LIBv2**, and T-Rec-Vulcan reductions of **53.73% / 19.79% / 16.24%**. These are context only; this directory does not label them as reproduced.
+These are context only; none are labeled reproduced here.
 
-## What this reproduction actually runs
-
-`reproduce.sh` downloads the current official Perses v2.7 release JAR, verifies its SHA-256, and runs the same tiny C program twice with a deterministic oracle:
-
-1. **baseline:** Perses with `--enable-trec false`, Vulcan disabled;
-2. **T-Rec:** the same Perses release/configuration with `--enable-trec true`.
+## Fresh scoped-L2 experiment
 
 Input:
 
@@ -43,14 +33,26 @@ int main(void) {
 }
 ```
 
-The property oracle recompiles each candidate with GCC and accepts it only when the executable still exits with code `7`. The declaration and use therefore cannot simply disappear. Plain syntax deletion has no rename operation; T-Rec can canonicalize the required identifier while preserving the property.
+The deterministic property oracle recompiles each candidate using `gcc -std=c11 -O0` and accepts it only if the executable still exits with code `7`.
 
-The run asserts all of the following:
+`reproduce.sh` verifies the official v2.7 JAR digest and runs three cases, with Vulcan, Latra, SFC and LPR explicitly disabled:
 
-- baseline reduced output still satisfies the oracle;
-- T-Rec reduced output still satisfies the oracle;
-- the long identifier disappears from the T-Rec result;
-- the T-Rec result is smaller in bytes than the no-T-Rec baseline.
+1. `direct_trec`: run the registered `token_canonicalizer` reducer directly;
+2. `modern_off`: current v2.7 default pipeline with `--enable-trec false`;
+3. `modern_on`: current v2.7 default pipeline with `--enable-trec true`.
+
+Fresh GitHub Actions result:
+
+| Probe | Bytes | Long identifier remains? | Oracle |
+|---|---:|---|---|
+| Original | 109 | yes | n/a |
+| Direct `token_canonicalizer` | 109 | **no** | pass |
+| v2.7 default, T-Rec off | 109 | **yes** | pass |
+| v2.7 default, T-Rec on | 109 | **no** | pass |
+
+The direct reducer therefore performs the intended lexical transformation end to end while preserving the property. The whole-file byte count stays at 109 because `ORIG_FORMAT` formatting compensates for the shorter lexeme; byte count on this tiny case is not a useful efficacy metric.
+
+The modern pipeline probe is more informative: T-Rec on/off has **0-byte marginal delta** on this case, yet only the T-Rec-on result canonicalizes the required long identifier. This is evidence for mechanism behavior, not evidence for the paper's aggregate size claims.
 
 Run locally:
 
@@ -58,56 +60,62 @@ Run locally:
 bash papers/2025-trec/reproduce.sh
 ```
 
-Evidence is written to `papers/2025-trec/results/`: `baseline.c`, `trec.c`, both reducer logs, and `l2-summary.json`.
+Evidence is written to `papers/2025-trec/results/`: three reduced programs, reducer logs, and `l2-summary.json`.
 
 ## Paper vs reproduction
 
 | Question | Paper | This run |
 |---|---|---|
-| Main scale | 3,796 canonicalization cases + multilingual reduction suites | 1 synthetic C case |
-| Reducer era | paper-era Perses/T-Rec | official Perses v2.7 (2026-08-26) |
-| Main result | aggregate duplicate elimination, bytes/tokens, runtime | mechanism-level byte delta and oracle preservation |
-| Baseline | Perses / Vulcan / C-Reduce variants | same v2.7 Perses, T-Rec toggled off |
-| Level justified | paper experiment | scoped **L2** only after fresh CI success |
+| Scale | 3,796 canonicalization cases + multilingual suites | 1 synthetic C case |
+| Reducer era | paper-era Perses/T-Rec | official Perses v2.7 |
+| Result | duplicate elimination, bytes/tokens, runtime | lexical canonicalization + property preservation + current-pipeline drift |
+| Baselines | Perses / Vulcan / C-Reduce variants | direct T-Rec plus current default pipeline on/off |
+| Level | paper experiment | scoped **L2**, not L1/L3 |
 
-No numerical comparison should be made between this one-case byte delta and the paper's 65.52% C aggregate: they answer different questions at radically different scales.
+No numerical comparison should be made between this single case and the paper's aggregate percentages.
 
-## L0 implementation audit
+## L0 implementation and reproducibility audit
 
-The current official Perses source keeps T-Rec as `TokenCanonicalizer`. The implementation iterates lexer tokens and, for identifiers, tries both replacing a single occurrence and replacing **all lexer nodes with the same lexeme**. Canonical identifier pools start with short names (`a`, `b`, ... and a separate uppercase pool), while other token classes use lexer-ATN-derived candidates plus fragment/character reduction.
+The current source registers T-Rec's `TokenCanonicalizer` as the reducer name `token_canonicalizer`. For identifiers it tries both a single occurrence and **all lexer nodes with the same lexeme**; canonical identifier pools begin with short names such as `a`, `b`, ... .
 
-The current command-line flag remains `--enable-trec` and defaults to `true`; Vulcan defaults to `false`. This makes a same-binary toggle experiment a cleaner baseline than comparing separate builds.
+Two important v2.7 drift findings emerged while making CI real:
+
+- `--alg perses` is rejected by the packaged v2.7 JAR.
+- the legacy `perses_node_priority_with_dfs_delta` name still appears in current benchmark scripts, but the packaged v2.7 JAR also rejects it.
+- v2.7 reports **Latra enabled by default**, so a naive `--enable-trec false` run is not a clean T-Rec-off baseline. This reproduction explicitly disables Latra and the other auxiliary transformers.
+
+These CLI/default changes are themselves reproducibility hazards for old reduction papers.
 
 ## Threats and limitations
 
-1. **Version drift:** v2.7 is a 2026 implementation, not necessarily the exact commit used for the 2024/2025 paper evaluation.
-2. **Synthetic input:** the scoped L2 case proves the reduction mechanism, not effectiveness on real compiler bugs.
-3. **Modern toolchain:** GitHub-hosted GCC/JDK versions differ substantially from the paper environment and from GCC 4.3.0 used in its duplicate study.
-4. **No L1 claim:** the published aggregate numbers are not recomputed from paper-era raw outputs in this directory.
-5. **No L3 claim:** the 3,796-case canonicalization benchmark and multilingual reduction suites are not rerun.
-6. **Metric scope:** bytes on a single tiny program are highly sensitive to formatting and cannot estimate population-level effectiveness.
+1. **Version drift:** v2.7 is a 2026 implementation, not the exact paper-era build.
+2. **Synthetic input:** scoped L2 proves a mechanism, not effectiveness on real compiler bugs.
+3. **Modern toolchain:** GitHub-hosted GCC/JDK versions differ from the paper environment and GCC 4.3.0 used in the duplicate study.
+4. **No L1 claim:** aggregate paper numbers were not recomputed from paper-era raw outputs.
+5. **No L3 claim:** the 3,796-case study and C/Rust/SMT-LIBv2 suites were not rerun.
+6. **Formatting confounder:** whole-file bytes can mask lexical shortening on tiny examples.
+7. **Current default-pipeline confounder:** v2.7 has accumulated reducers/default changes, so it cannot be treated as paper-era Perses without pinning the historical implementation.
 
-## Blockers / upgrade path
+## Upgrade path
 
 ### To L1
 
-Locate a paper-specific release of the exact per-case result outputs (or an archived paper artifact) and recompute the duplicate counts, byte/token tables and runtime aggregates from those raw files. The current Perses repository contains benchmark subjects and T-Rec code, but this audit did not find a clearly labeled `Benchmark-Multi`/T-Rec result package by those paper names.
+Locate a paper-specific archive with exact per-case outputs and recompute duplicate counts, byte/token tables and runtime aggregates. The current Perses tree exposes benchmark subjects and T-Rec code, but this audit did not find a clearly labeled paper-era `Benchmark-Multi`/T-Rec result package.
 
 ### To L3
 
-Pin the paper-era Perses/T-Rec commit, compilers/solvers and benchmark revisions, then rerun the full C/Rust/SMT-LIBv2 suite and the canonicalization study. Old vulnerable compilers, benchmark provenance and runtime cost become first-class reproducibility dependencies.
+Pin the paper-era Perses/T-Rec commit, compiler/solver versions and benchmark revisions, then rerun the C/Rust/SMT-LIBv2 suite and the canonicalization study. Old vulnerable compilers, benchmark provenance and runtime cost are first-class dependencies.
 
 ## Most valuable L4 extension — lexical-transformation ROI under toolchain drift
 
 Run paper-era bugs plus **post-paper compiler bugs** under an equal property-oracle-call budget and compare:
 
-- Perses only;
-- Perses + full T-Rec;
+- historical Perses only;
+- historical Perses + T-Rec;
+- current v2.7 pipeline with T-Rec off/on;
 - identifier-only canonicalization;
 - literal/ATN canonicalization only;
 - fragment/character deletion only;
-- Vulcan / SFC / Latra / DRReduce as modern reduction baselines.
+- Vulcan / SFC / Latra / DRReduce as modern baselines.
 
-Record accepted transformations, downstream byte/token savings, oracle calls, wall time and duplicate-collapse rate. Repeat on a paper-era Perses commit and current v2.7. This separates **T-Rec's actual transformation value** from improvements or regressions caused by reducer/toolchain drift.
-
-A second useful ablation is canonicalization collision behavior: classify cases where aggressive identifier merging improves duplicate detection, where it is rejected by the oracle, and where language semantics make case-sensitive pools or token-level replacement insufficient.
+Record accepted transformations, lexeme/token/byte savings, oracle calls, wall time and duplicate-collapse rate. Repeat across a paper-era commit and v2.7. This directly separates **T-Rec transformation value** from reducer/toolchain drift.
