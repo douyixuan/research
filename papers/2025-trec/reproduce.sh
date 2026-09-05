@@ -35,9 +35,11 @@ run_case() {
   if ! (
     cd "$dir"
     java -jar "$JAR" \
-      --alg perses \
       --enable-trec "$trec" \
       --enable-vulcan false \
+      --enable-latra false \
+      --enable-sfc false \
+      --enable-lpr false \
       --threads 1 \
       --code-format ORIG_FORMAT \
       --test-script oracle.sh \
@@ -102,6 +104,7 @@ print(json.dumps({
     'baseline_oracle_pass': True,
     'trec_oracle_pass': True,
     'long_identifier_removed_by_trec': True,
+    'auxiliary_transformers_disabled': ['vulcan', 'latra', 'sfc', 'lpr'],
     'claim_scope': 'single synthetic C mechanism case; not paper-scale L1/L3'
 }, indent=2))
 PY
