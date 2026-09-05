@@ -15,7 +15,13 @@ mkdir -p "$RESULTS" "$WORK"
 if [[ ! -f "$JAR" ]]; then
   curl --fail --location --retry 3 "$PERSES_URL" -o "$JAR"
 fi
-printf '%s  %s\n' "$PERSES_SHA256" "$JAR" | sha256sum --check --status
+actual_sha256="$(sha256sum "$JAR" | awk '{print $1}')"
+echo "Perses v2.7 expected SHA-256: $PERSES_SHA256"
+echo "Perses v2.7 actual   SHA-256: $actual_sha256"
+if [[ "$actual_sha256" != "$PERSES_SHA256" ]]; then
+  echo 'Perses release checksum mismatch' >&2
+  exit 10
+fi
 
 run_case() {
   local label="$1"
