@@ -30,11 +30,12 @@ jobs:
       - name: Show evidence
         run: |
           cat papers/2025-trec/results/l2-summary.json
-          printf '\n--- baseline ---\n'
-          cat papers/2025-trec/results/baseline.c
-          printf '\n--- T-Rec ---\n'
-          cat papers/2025-trec/results/trec.c
+          for f in direct_trec modern_off modern_on; do
+            printf '\n--- %s ---\n' "$f"
+            cat "papers/2025-trec/results/${f}.c"
+          done
       - name: Publish reproduction evidence
+        if: always()
         uses: actions/upload-artifact@v6
         with:
           name: trec-scoped-l2
