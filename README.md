@@ -47,6 +47,7 @@ The repository should never call an L1 result a full reproduction.
 | 2026-09-01 | [Latra: A Template-Based Language-Agnostic Transformation Framework for Effective Program Reduction](papers/2025-latra/) | ASE 2025 | L1 partial; official L2 Docker lane scaffolded/manual | `paper-latra.yml` ✅ L1 |
 | 2026-09-03 | [Update from Hell: Can Coding Agents Survive Hidden Breakage in Dependency Upgrades? (DEPBENCH)](papers/2026-depbench/) | arXiv 2026 preprint | L0 claim/artifact audit + scoped L2 public-case reconstruction | `paper-depbench.yml` ✅ |
 | 2026-09-04 | [Boosting Program Reduction with the Missing Piece of Syntax-Guided Transformations (SFC)](papers/2025-sfc/) | OOPSLA 2025 | L1 released minimization results + L0 artifact/live-run audit | `paper-sfc.yml` ✅ |
+| 2026-09-05 | [T-Rec: Fine-Grained Language-Agnostic Program Reduction Guided by Lexical Syntax](papers/2025-trec/) | ACM TOSEM 34(2), 2025 | L0 implementation audit + scoped L2 current-release mechanism | `paper-trec.yml` |
 
 ## Daily workflow
 
