@@ -44,12 +44,11 @@ def fetch_csv(name: str) -> list[dict[str, str]]:
     url = f"{RAW}/{RQ2_FILES[name]}"
     with urllib.request.urlopen(url, timeout=30) as r:
         text = r.read().decode("utf-8-sig")
-    # The release mixes headered C CSVs and headerless XML CSVs. Parse all
-    # rows with explicit fields, then discard an optional header row.
+    # The release mixes headered C CSVs, headerless XML CSVs, and XML files
+    # with a header appended at EOF. Parse explicit fields and filter headers
+    # wherever they occur.
     rows = list(csv.DictReader(text.splitlines(), fieldnames=FIELDS))
-    if rows and rows[0]["Time"].strip() == "Time":
-        rows = rows[1:]
-    return rows
+    return [row for row in rows if row["Time"].strip() != "Time"]
 
 
 def dedupe_keep_last(rows: list[dict[str, str]]) -> tuple[list[dict[str, str]], list[str]]:
