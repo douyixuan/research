@@ -22,6 +22,7 @@ from pathlib import Path
 UPSTREAM_REPO = "weightdd/WeightDD"
 UPSTREAM_COMMIT = "4a6cdd00f3f136867f23f76057a7104961c2e8e4"
 RAW = f"https://raw.githubusercontent.com/{UPSTREAM_REPO}/{UPSTREAM_COMMIT}/results_csv"
+FIELDS = ["Subject", "Query", "Time", "Token_remaining"]
 
 RQ2_FILES = {
     "hdd_ddmin_c": "hdd_ddmin_c.csv", "hdd_wdd_c": "hdd_wdd_c.csv",
@@ -43,7 +44,11 @@ def fetch_csv(name: str) -> list[dict[str, str]]:
     url = f"{RAW}/{RQ2_FILES[name]}"
     with urllib.request.urlopen(url, timeout=30) as r:
         text = r.read().decode("utf-8-sig")
-    return list(csv.DictReader(text.splitlines()))
+    lines = text.splitlines()
+    # Released C CSVs have a header; released XML CSVs do not. Normalize both.
+    if lines and lines[0].split(",", 1)[0].strip() == "Subject":
+        return list(csv.DictReader(lines))
+    return list(csv.DictReader(lines, fieldnames=FIELDS))
 
 
 def dedupe_keep_last(rows: list[dict[str, str]]) -> tuple[list[dict[str, str]], list[str]]:
