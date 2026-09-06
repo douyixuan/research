@@ -1,0 +1,39 @@
+name: paper-wdd
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'papers/2025-wdd/**'
+      - '.github/workflows/paper-wdd.yml'
+  pull_request:
+    paths:
+      - 'papers/2025-wdd/**'
+      - '.github/workflows/paper-wdd.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  reproduce:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Environment
+        run: |
+          python3 --version
+          gcc --version | head -1
+      - name: Reproduce WDD L1 + scoped L2
+        run: bash papers/2025-wdd/reproduce.sh
+      - name: Upload reproduction evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: wdd-reproduction
+          path: papers/2025-wdd/results/
+          if-no-files-found: error
