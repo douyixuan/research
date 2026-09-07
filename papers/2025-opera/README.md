@@ -26,17 +26,21 @@ Outputs are written to `results/` and uploaded by GitHub Actions.
 ## Paper vs reproduction
 
 | Claim | Paper | This reproduction |
-|---|---:|---|
-| Mean APFD of OPERA | 0.898 | Recomputed from released rank data; CI asserts within 0.0015 |
-| Improvement vs random | 13.1% | Recomputed; CI asserts within 0.25 percentage points |
-| Improvement vs FAST | 11.9% | Recomputed; CI asserts within 0.25 pp |
-| Improvement vs total coverage | 47.4% | Recomputed; CI asserts within 0.25 pp |
-| Improvement vs additional coverage | 37.2% | Recomputed; CI asserts within 0.25 pp |
+|---|---:|---:|
+| Mean APFD of OPERA | 0.898 | **0.897619** |
+| Improvement vs random | 13.1% | **13.0855%** |
+| Improvement vs FAST | 11.9% | **11.9037%** |
+| Improvement vs total coverage | 47.4% | **47.3980%** |
+| Improvement vs additional coverage | 37.2% | **37.1985%** |
 | Previously unknown bugs | 170 | L0 only; no paper-scale rerun |
-| Confirmed/fixed at paper time | 90 | Pinned artifact ledger has 102, indicating post-paper status updates |
-| Frontend bug-finding effectiveness | 8 frontends, historical versions | Not rerun; requires historical DL/compiler stack |
+| Confirmed/fixed at paper time | 90 | Pinned artifact ledger: **102** |
+| Frontend bug-finding effectiveness | 8 frontends, historical versions | Not rerun |
 
-The 102-vs-90 difference is treated as provenance/status drift, not as a failed reproduction: the paper states 90 confirmed/fixed at evaluation time, while the later artifact ledger explicitly states 102 confirmed/fixed.
+All five APFD aggregate claims reproduce to the paper's displayed precision. The 102-vs-90 difference is treated as provenance/status drift, not as a failed reproduction: the paper states 90 confirmed/fixed at evaluation time, while the later artifact ledger explicitly states 102 confirmed/fixed.
+
+### Scoped L2 result
+
+The fresh synthetic prioritization run produced APFD **0.58333** versus **0.52778** for a deterministic alphabetical baseline (`+0.05556`). It exercises the priority/update loop but is intentionally too small and synthetic to support any claim about the paper's compiler bug-finding effectiveness.
 
 ## Threats and limitations
 
