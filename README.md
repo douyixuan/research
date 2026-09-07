@@ -50,6 +50,7 @@ The repository should never call an L1 result a full reproduction.
 | 2026-09-05 | [T-Rec: Fine-Grained Language-Agnostic Program Reduction Guided by Lexical Syntax](papers/2025-trec/) | ACM TOSEM 34(2), 2025 | L0 implementation audit + scoped L2 current-release mechanism | `paper-trec.yml` |
 | 2026-09-06 | [WDD: Weighted Delta Debugging](papers/2025-wdd/) | ICSE 2025 | L1 partial (RQ2) + scoped L2 compile/execute mechanism | `paper-wdd.yml` |
 | 2026-09-07 | [Toward a Better Understanding of Probabilistic Delta Debugging (CDD)](papers/2025-cdd/) | ICSE 2025 | L1 partial + scoped L2 current-Perses live comparison | `paper-cdd.yml` + manual `paper-cdd-official.yml` |
+| 2026-09-07 | [A Tale of Two DL Cities: When Library Tests Meet Compiler (OPERA)](papers/2025-opera/) | ICSE 2025 | L1 APFD + L0 artifact audit + scoped L2 prioritization mechanism | `paper-opera.yml` |
 
 ## Daily workflow
 
