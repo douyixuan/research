@@ -1,0 +1,64 @@
+name: paper-cdd-official
+
+on:
+  workflow_dispatch:
+    inputs:
+      algorithm:
+        description: 'ddmin, probdd, or cdd'
+        required: true
+        default: 'cdd'
+        type: choice
+        options: [ddmin, probdd, cdd]
+      benchmark:
+        description: 'BM-C benchmark name'
+        required: true
+        default: 'clang-22382'
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  official-single-case:
+    # Intentionally requires a dedicated self-hosted runner: the official
+    # Docker image is documented as nearly 80 GB and single-case runs can be long.
+    runs-on: [self-hosted, linux, x64, cdd-artifact]
+    timeout-minutes: 1440
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run one official BM-C case
+        env:
+          ALGORITHM: ${{ inputs.algorithm }}
+          BENCHMARK: ${{ inputs.benchmark }}
+        run: |
+          set -euo pipefail
+          out="$PWD/papers/2025-cdd/results/official"
+          mkdir -p "$out"
+          docker pull m492zhan/cdd:latest
+          docker run --rm --cap-add SYS_PTRACE \
+            -e ALGORITHM -e BENCHMARK \
+            -v "$out:/out" \
+            m492zhan/cdd:latest bash -lc '
+              set -euo pipefail
+              cd /home/coq/cdd
+              ./scripts/build_hdd.sh
+              ./scripts/build_chisel.sh
+              ./scripts/run_program_reduction.sh \
+                --args_for_tool "--dd ${ALGORITHM} --init-probability 0.1" \
+                --benchmark "${BENCHMARK}"
+              latest=$(ls -1dt /home/coq/cdd/results/compilerbugs/* | head -1)
+              if [[ -f /home/coq/cdd/scripts/summarize_program_reduction.py ]]; then
+                python /home/coq/cdd/scripts/summarize_program_reduction.py "$latest"
+              else
+                python /home/coq/cdd/script/summarize_program_reduction.py "$latest"
+              fi
+              cp "$latest/summary.csv" /out/
+              cp "$latest/config.txt" /out/
+            '
+      - name: Upload official-case evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cdd-official-${{ inputs.algorithm }}-${{ inputs.benchmark }}
+          path: papers/2025-cdd/results/official/
+          if-no-files-found: warn
