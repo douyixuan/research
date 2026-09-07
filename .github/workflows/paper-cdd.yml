@@ -1,0 +1,43 @@
+name: paper-cdd
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'papers/2025-cdd/**'
+      - '.github/workflows/paper-cdd.yml'
+  pull_request:
+    paths:
+      - 'papers/2025-cdd/**'
+      - '.github/workflows/paper-cdd.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  reproduce:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Dependencies
+        run: python -m pip install --disable-pip-version-check scipy pandas numpy
+      - name: Environment
+        run: |
+          python3 --version
+          java -version
+          gcc --version | head -1
+          clang --version | head -1
+      - name: Reproduce CDD L1 partial + scoped L2
+        run: bash papers/2025-cdd/reproduce.sh
+      - name: Upload reproduction evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cdd-reproduction
+          path: papers/2025-cdd/results/
+          if-no-files-found: error
