@@ -12,6 +12,11 @@ JAR="${PERSES_JAR:-$WORK/perses_deploy.jar}"
 rm -rf "$RESULTS" "$WORK/cdd" "$WORK/probdd"
 mkdir -p "$RESULTS" "$WORK"
 
+# L1 partial: re-run the authors' statistics over their released precomputed data.
+bash "$PAPER_DIR/reproduce_l1.sh"
+
+# Scoped L2: run the current official Perses implementations of CDD and ProbDD
+# on an upstream toy reduction case with a real compile/execute oracle.
 if [[ ! -f "$JAR" ]]; then
   curl --fail --location --retry 3 "$PERSES_URL" -o "$JAR"
 fi
@@ -94,7 +99,7 @@ prob = int(os.environ['PROBDD_BYTES'])
 cq = int(os.environ['CDD_QUERIES'])
 pq = int(os.environ['PROBDD_QUERIES'])
 print(json.dumps({
-    'level': 'L0 artifact audit + scoped L2 current-Perses live comparison',
+    'level': 'L1 partial + scoped L2 current-Perses live comparison',
     'paper': 'Toward a Better Understanding of Probabilistic Delta Debugging',
     'perses_release': 'v2.7',
     'perses_sha256': '1102ec7e3e601792a3c271c41ac7df52b03fca635df552500c241933c2c1e427',
@@ -108,7 +113,7 @@ print(json.dumps({
     'query_delta_cdd_minus_probdd': cq - pq,
     'cdd_vs_probdd_query_change_pct': round((cq - pq) * 100.0 / pq, 4) if pq else None,
     'both_outputs_freshly_validated': True,
-    'claim_scope': 'single upstream toy case on current Perses; not author artifact L1 and not paper-scale L3'
+    'claim_scope': 'L1 only reprocesses released precomputed statistics; L2 is one current-toolchain upstream toy case; not paper-scale L3'
 }, indent=2))
 PY
 
