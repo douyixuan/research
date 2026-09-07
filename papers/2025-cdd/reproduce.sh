@@ -63,14 +63,20 @@ run_case() {
   }
   cp "$reduced" "$RESULTS/${label}.c"
 
-  local queries=0
-  if [[ -f "$dir/oracle-count.log" ]]; then
-    queries="$(wc -l < "$dir/oracle-count.log" | tr -d ' ')"
-  fi
+  # Perses executes the test script in isolated work directories, so a counter
+  # file written by the oracle is not a reliable cross-process counter. Parse
+  # Perses' own final execution counter instead.
+  local queries
+  queries="$(sed -n 's/.*Test script execution count: \([0-9][0-9]*\).*/\1/p' "$RESULTS/${label}.log" | tail -1)"
+  [[ "$queries" =~ ^[0-9]+$ ]] || {
+    echo "Could not parse test-script execution count for $label" >&2
+    tail -80 "$RESULTS/${label}.log" >&2
+    exit 12
+  }
   echo "$queries" > "$RESULTS/${label}-queries.txt"
 
   # Fresh validation of the produced reducer output. This validation is not
-  # included in the query count above.
+  # included in Perses' query count above.
   local validate="$WORK/validate-$label"
   rm -rf "$validate"
   mkdir -p "$validate"
@@ -105,6 +111,7 @@ print(json.dumps({
     'perses_sha256': '1102ec7e3e601792a3c271c41ac7df52b03fca635df552500c241933c2c1e427',
     'case_provenance': 'uw-pluverse/perses v2.7 test/org/perses/benchmark_toys/delta_1',
     'oracle': 'upstream-style gcc+clang compile, run, require output containing world',
+    'query_count_source': 'Perses final Test script execution count',
     'input_bytes': inp,
     'cdd_bytes': cdd,
     'probdd_bytes': prob,
