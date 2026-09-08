@@ -1,6 +1,6 @@
 # Yongqiang Tian paper tracker
 
-Last public-source sweep: **2026-09-02**.
+Last public-source sweep: **2026-09-08**.
 
 This file separates the discovery queue from completed reproduction directories. It intentionally includes preprints and tool demonstrations that may not yet be prominent in Scholar/DBLP so they do not get lost between daily runs.
 
@@ -23,21 +23,29 @@ This file separates the discovery queue from completed reproduction directories.
 | Semantic-aware and Self-improving Program Reduction via Agentic Large Language Models (PROJ) | arXiv 2607.03766, 2026-07-04 | ✅ `papers/2026-proj/` — L0 claim audit + scoped L2 control mechanism; live-LLM lane scaffolded |
 | VIZDETOUR: Detecting Rendering Bugs in Imperative Data Visualization Libraries via Equivalent Mutations | 2026 preprint | ✅ `papers/2026-vizdetour/` |
 | Enhancing Differential Testing with LLMs for Testing Deep Learning Libraries | ACM TOSEM 35(4), Article 88, Apr 2026; author page lists TOSEM 2025 | ✅ `papers/2026-dllens/` — L1 partial + L0 implementation audit |
+| Update from Hell: Can Coding Agents Survive Hidden Breakage in Dependency Upgrades? (DEPBENCH) | arXiv 2026 preprint | ✅ `papers/2026-depbench/` — L0 + scoped L2 |
 | Latra: A Template-Based Language-Agnostic Transformation Framework for Effective Program Reduction | ASE 2025 | ✅ `papers/2025-latra/` — L1 partial + official L2 probe scaffold |
+| Boosting Program Reduction with the Missing Piece of Syntax-Guided Transformations (SFC) | OOPSLA 2025 | ✅ `papers/2025-sfc/` — L1 |
+| T-Rec: Fine-Grained Language-Agnostic Program Reduction Guided by Lexical Syntax | TOSEM 2025 | ✅ `papers/2025-trec/` — L0 + scoped L2 |
+| Weighted Delta Debugging (WDD) | ICSE 2025 | ✅ `papers/2025-wdd/` — L1 partial + scoped L2 |
+| Toward a Better Understanding of Probabilistic Delta Debugging (CDD) | ICSE 2025 | ✅ `papers/2025-cdd/` — L1 partial + scoped L2 |
+| A Tale of Two DL Cities: When Library Tests Meet Compiler (OPERA) | ICSE 2025 | ✅ `papers/2025-opera/` — L1 + scoped L2 |
+| Compilation Consistency Modulo Debug Information (CCMD / Dfusor) | ASPLOS 2023 | ✅ `papers/2023-ccmd/` — L0 artifact audit + scoped L2 |
 
 ## Discovery sources
 
 - Yongqiang Tian publications: https://yqtian.com/pub.html
 - Google Scholar / DBLP author records
 - arXiv searches for newly indexed preprints
-- conference publication pages and official artifacts/GitHub repositories
+- ACM/IEEE/conference publication pages
+- official artifacts and GitHub repositories
 
-## Discovery note (2026-09-02)
+## Discovery note (2026-09-08)
 
-A fresh sweep of Yongqiang Tian's publication page, arXiv/DBLP indexing, and targeted GitHub searches did not surface a newer 2026 compiler/testing/program-reduction paper beyond the already tracked July preprints. PROJ remained the highest-priority unfinished 2026 program-reduction item because its previous directory stopped at L0 plus a toy architecture smoke.
+A fresh sweep of Yongqiang Tian's publication page, DBLP/arXiv indexing, and targeted searches did not surface a new untracked 2026 compiler/testing/program-reduction paper that should preempt the queue. The highest-value unfinished compiler-testing item located outside the already completed set was **Compilation Consistency Modulo Debug Information (ASPLOS 2023)**.
 
-Today's upgrade adds a live compile/execute control-pipeline reproduction: proposal acceptance/rejection is guarded by an executable oracle, exploration is allowed to temporarily grow the program, successful transforms are distilled, and the same learned strategies are replayed on a differently named held-out fixture. The deterministic path is recorded as **scoped L2 mechanism**, not a faithful model-driven PROJ rerun. A manual live-LLM Action scaffold is also present but remains blocked on endpoint/key/model secrets and the absence of the authors' official artifact.
+Today's reproduction verifies the archived Dfusor artifact description and implements a fresh deterministic CCMD oracle over paper-inspired RCL/OCP/FCO fixtures. The scoped experiment compares GCC/Clang builds with and without `-g3`, checks `.text` identity and runtime output at `-O0/-O2`, and measures DWARF amplification. It is recorded as **L0 + scoped L2**, not L1/L3; the official Dfusor Docker artifact is ~15 GB and the paper-scale randomized campaign is intentionally kept out of hosted CI.
 
 ## Next queue
 
-Re-scan 2026 first. If no new item appears, next priority is **Boosting Program Reduction with the Missing Piece of Syntax-Guided Transformations** (OOPSLA 2025), then weighted/probabilistic delta debugging work.
+Re-scan 2026 first. If nothing new appears, continue backward through unfinished compiler/testing work, favoring papers with public artifacts or historical compiler bugs that can be converted into modern regression tests.
