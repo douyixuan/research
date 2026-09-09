@@ -8,7 +8,7 @@ from pathlib import Path
 PAPER_CLAIMS = {"c": 24.93, "rust": 4.47, "js": 11.71}
 EXPECTED_CASES = {"c": 20, "rust": 20, "js": 10}
 PROGRAM_NAMES = {"c": "small.c", "rust": "small.rs", "js": "small.js"}
-UPSTREAM_COMMIT = "d45ea0e261a8f4c7ec05fc29ccb5aadd19d673cc"
+UPSTREAM_COMMIT = "1cd376048ae5c653fe61745a3d25c4a8a871d361"
 
 
 def count_tokens(jar: Path, program: Path) -> int:
