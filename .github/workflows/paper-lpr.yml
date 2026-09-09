@@ -1,0 +1,38 @@
+name: paper-lpr
+
+on:
+  push:
+    paths:
+      - 'papers/2024-lpr/**'
+      - '.github/workflows/paper-lpr.yml'
+  pull_request:
+    paths:
+      - 'papers/2024-lpr/**'
+      - '.github/workflows/paper-lpr.yml'
+  workflow_dispatch:
+
+jobs:
+  reproduce-l1:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Reprocess official released outputs
+        run: bash papers/2024-lpr/reproduce.sh
+
+      - name: Show summary
+        run: cat papers/2024-lpr/results/summary.md
+
+      - name: Upload reproduction evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lpr-l1-reproduction
+          path: papers/2024-lpr/results/
+          if-no-files-found: error
