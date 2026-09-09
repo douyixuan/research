@@ -26,7 +26,7 @@ Requirements: Linux/macOS, Git, Python 3, and Java.
 bash papers/2024-lpr/reproduce.sh
 ```
 
-The script pins the official artifact to commit `d45ea0e261a8f4c7ec05fc29ccb5aadd19d673cc`, counts tokens in the released `vulcan` and `lpr_0..4` outputs, checks that all 50 benchmark cases are present, and writes:
+The script pins the official artifact to commit `1cd376048ae5c653fe61745a3d25c4a8a871d361`, sparse-checks out only the released reducer outputs and token counter needed for this lane, checks that all 50 benchmark cases are present, and writes:
 
 - `results/results.json` — per-case and aggregate data;
 - `results/summary.md` — compact paper-vs-artifact comparison.
