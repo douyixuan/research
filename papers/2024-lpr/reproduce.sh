@@ -14,8 +14,8 @@ if [[ ! -d "${UPSTREAM}/.git" ]]; then
   git -C "${UPSTREAM}" sparse-checkout set \
     tools \
     benchmark_suites/c/vulcan benchmark_suites/c/lpr_0 benchmark_suites/c/lpr_1 benchmark_suites/c/lpr_2 benchmark_suites/c/lpr_3 benchmark_suites/c/lpr_4 \
-    benchmark_suites/rust/vulcan benchmark_suites/rust/lpr_0 benchmark_suites/rust/lpr_1 benchmark_suites/rust/lpr_2 benchmark_suites/rust/lpr_3 benchmark_suites/rust/lpr_4 \
-    benchmark_suites/js/vulcan benchmark_suites/js/lpr_0 benchmark_suites/js/lpr_1 benchmark_suites/js/lpr_2 benchmark_suites/js/lpr_3 benchmark_suites/js/lpr_4
+    benchmark_suites/rust/vulcan_results benchmark_suites/rust/lpr_0 benchmark_suites/rust/lpr_1 benchmark_suites/rust/lpr_2 benchmark_suites/rust/lpr_3 benchmark_suites/rust/lpr_4 \
+    benchmark_suites/js/vulcan_results benchmark_suites/js/lpr_0 benchmark_suites/js/lpr_1 benchmark_suites/js/lpr_2 benchmark_suites/js/lpr_3 benchmark_suites/js/lpr_4
 fi
 
 git -C "${UPSTREAM}" checkout --quiet --detach "${UPSTREAM_COMMIT}"
