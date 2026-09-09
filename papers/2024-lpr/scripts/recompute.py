@@ -8,6 +8,7 @@ from pathlib import Path
 PAPER_CLAIMS = {"c": 24.93, "rust": 4.47, "js": 11.71}
 EXPECTED_CASES = {"c": 20, "rust": 20, "js": 10}
 PROGRAM_NAMES = {"c": "small.c", "rust": "small.rs", "js": "small.js"}
+BASELINE_DIRS = {"c": "vulcan", "rust": "vulcan_results", "js": "vulcan_results"}
 UPSTREAM_COMMIT = "1cd376048ae5c653fe61745a3d25c4a8a871d361"
 
 
@@ -30,12 +31,14 @@ def case_dirs(path: Path):
 
 def compute_language(artifact: Path, lang: str):
     suite = artifact / "benchmark_suites" / lang
-    vulcan = case_dirs(suite / "vulcan")
+    baseline_name = BASELINE_DIRS[lang]
+    vulcan = case_dirs(suite / baseline_name)
     lpr_runs = [case_dirs(suite / f"lpr_{i}") for i in range(5)]
     common = sorted(set(vulcan).intersection(*(set(run) for run in lpr_runs)))
     if len(common) != EXPECTED_CASES[lang]:
         raise RuntimeError(
-            f"{lang}: expected {EXPECTED_CASES[lang]} common cases, found {len(common)}"
+            f"{lang}: expected {EXPECTED_CASES[lang]} common cases, found {len(common)} "
+            f"using baseline directory {baseline_name}"
         )
 
     jar = artifact / "tools" / "token_counter_deploy.jar"
@@ -67,6 +70,7 @@ def compute_language(artifact: Path, lang: str):
     claim = PAPER_CLAIMS[lang]
     return {
         "language": lang,
+        "baseline_directory": baseline_name,
         "cases": len(rows),
         "runs_per_case": 5,
         "paper_effectiveness_claim_pct": claim,
