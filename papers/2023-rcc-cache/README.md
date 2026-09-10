@@ -3,100 +3,113 @@
 Yongqiang Tian, Xueyan Zhang, Yiwen Dong, Zhenyang Xu, Mengxiao Zhang, Yu Jiang, Shing-Chi Cheung, Chengnian Sun. ACM TOSEM 33(1), 2023. DOI: 10.1145/3617172.
 
 Paper: https://cs.uwaterloo.ca/~cnsun/public/publication/tosem23b/tosem23b.pdf  
-Official reproduction guide / implementation: https://github.com/uw-pluverse/perses/blob/master/doc/RCC.md
+Official implementation/reproduction guide: https://github.com/uw-pluverse/perses/blob/master/doc/RCC.md
 
 ## Reproduction level
 
-**L0 artifact/claim audit + scoped L2 current-release mechanism probe.**
+**L0 artifact/toolchain audit + scoped L2 mechanism model.**
 
-This is **not L1**: the paper's 31-subject raw measurements are not committed here and this run does not recompute the paper tables from released raw outputs. It is **not L3**: the full benchmark needs historical GCC/Clang Docker images, many hours, and the authors recommend 128 GB RAM.
+This is **not L1**: the paper's 31-subject raw measurements were not reprocessed here. It is **not L3**: the historical 31-bug experiment requires old GCC/Clang environments, long-running Docker jobs, and substantially more memory than ordinary hosted CI.
 
 ## Core insight
 
-Program reducers often generate the same candidate program more than once, so property checks are wasted unless variants are cached. Straight string caching (STR) can itself become a memory bottleneck. The paper evaluates ZIP and SHA compression and proposes **Refreshable Compact Caching (RCC)**:
+Program reducers often generate the same candidate program more than once. Caching can avoid repeated expensive property checks, but storing full program strings can itself consume substantial memory. The paper evaluates several cache representations and proposes **Refreshable Compact Caching (RCC)**:
 
 1. encode a candidate losslessly as slicing intervals of the current minimum program; and
-2. when the minimum shrinks, remove cached variants that cannot be subsequences of the new minimum and therefore cannot recur.
+2. when the minimum shrinks, discard cached variants that are no longer subsequences of the new minimum and therefore cannot reappear later in deletion-based reduction.
 
-The paper reports that caching avoids 61.8% of property queries in HDD and 24.3% in Perses. RCC is reported to reduce peak cache size versus the second-best scheme by 96.4% in HDD and 91.74% in Perses, while preserving the same query count as the other correct caching schemes.
+The paper reports that caching avoids **61.8%** of property queries for HDD and **24.3%** for Perses. RCC is reported to reduce peak cache size versus the second-best scheme by **96.4%** for HDD and **91.74%** for Perses.
 
-## What is actually run here
+## What actually ran
 
-`reproduce.sh` performs two independent checks.
+### A. Deterministic scoped L2 mechanism model
 
-### A. Deterministic RCC mechanism trace
+`reproduce.py` executes a synthetic reduction trace with repeated adjacent fragments. It checks three RCC invariants:
 
-`reproduce.py` runs a synthetic reduction trace with adjacent identical fragments. It checks that:
+- candidate interval encoding is lossless;
+- duplicate variants collapse to one canonical cache key;
+- after an accepted minimum shrink, stale cached variants that cannot be subsequences of the new minimum are removed.
 
-- identical candidate variants map to one canonical interval key;
-- interval encoding is lossless;
-- a minimum shrink invalidates stale cache entries that are not subsequences of the new minimum;
-- cached execution avoids redundant oracle calls without changing the accepted minimum.
+Observed deterministic result:
 
-This is a mechanism-level **scoped L2**, not the official Perses implementation.
+- no cache: **25** synthetic property-oracle evaluations;
+- RCC model: **3** evaluations;
+- cache hits: **22**;
+- synthetic oracle-call reduction: **88%**.
 
-### B. Live current Perses probe
+The 88% number is deliberately constructed by the tiny duplicate-heavy fixture and is **not comparable** to the paper's 24.3% Perses average.
 
-The script downloads the official **Perses v2.7** release JAR and verifies SHA-256 `1102ec7e3e601792a3c271c41ac7df52b03fca635df552500c241933c2c1e427`. It then runs the same tiny C reducer workload twice:
-
-- no query cache: `--query-caching FALSE`
-- RCC: `--query-caching TRUE --query-cache-type COMPACT_QUERY_CACHE`
-
-Vulcan, Latra, SFC, LPR, and T-Rec are disabled and `--threads 1` is used so the comparison isolates the query-cache path as far as practical. The property checker requires all twelve repeated `+=` fragments, then compiles and executes the candidate with GCC. The external oracle invocation count is recorded directly.
-
-Run:
+Run the always-supported lane with:
 
 ```bash
 bash papers/2023-rcc-cache/reproduce.sh
 ```
 
-Generated evidence is written to `results/` and uploaded by `paper-rcc-cache.yml`.
+The result is written to `results/mechanism-summary.json` and uploaded by `paper-rcc-cache.yml`.
+
+### B. Official Perses integration audit
+
+A live implementation probe exposed material toolchain drift rather than producing a valid paper-style result:
+
+- **Perses v2.7 (2026-08-26):** the no-cache tiny reducer case ran, but the public `--query-cache-type` selector used by the old RCC scripts is no longer present in the current CLI/source. The current reduction driver reports a fixed `CONTENT_SHA_HASH_FORMAT` cache type, while the still-present historical `benchmark/rcc-exp-script/` continues to reference `--query-cache-type COMPACT_QUERY_CACHE`.
+- **Perses v1.9 (2025-01-10):** its published CLI still exposes `--query-cache-type COMPACT_QUERY_CACHE`, so a historical live scaffold is included. However, the prebuilt v1.9 JAR failed even on the default tiny case in the current GitHub-hosted runner, including a Java 21 attempt. Because that integration did not complete, no v1.9 result is claimed as L2.
+
+The historical probe is therefore opt-in rather than a required CI lane:
+
+```bash
+RCC_HISTORICAL_LIVE=1 bash papers/2023-rcc-cache/reproduce.sh
+```
+
+The GitHub Action exposes the same probe through `workflow_dispatch` with `historical_live=true`. A successful future run may be labeled scoped L2; a failed run is evidence of environment/toolchain drift only.
 
 ## Experiment design
 
-| Question | Measurement | Pass condition |
+| Question | Measurement | Status |
 |---|---|---|
-| Does canonical compact encoding preserve a variant? | encode/decode synthetic subsequence | exact token equality |
-| Does refresh remove stale entries? | cache entries before/after accepted minimum shrink | at least one stale entry removed |
-| Does caching suppress duplicate checks in the mechanism trace? | external synthetic oracle calls | cached calls < no-cache calls |
-| Does current Perses still expose the paper's RCC implementation? | v2.7 live run with `COMPACT_QUERY_CACHE` | reducer completes and final candidate passes oracle |
-| Does RCC add property checks on the tiny live case? | external test-script invocations | RCC calls <= no-cache calls |
+| Is compact interval encoding lossless? | encode/decode synthetic subsequence | reproduced |
+| Do duplicate candidates collapse to one cache key? | repeated identical variants | reproduced |
+| Does refresh remove stale entries after the minimum shrinks? | cache before/after accepted shrink | reproduced |
+| Does current Perses still expose paper RCC selection? | inspect/run v2.7 | no: selector drift found |
+| Can an RCC-capable tagged release run in hosted CI? | v1.9 default/no-cache/RCC scaffold | currently blocked before valid comparison |
+| Can paper Tables/RQs be recomputed? | released 31-subject raw outputs | not done; no L1 claim |
 
 ## Paper vs reproduction
 
-| Item | Paper | This reproduction |
+| Item | Paper | This repository |
 |---|---:|---|
-| Subjects | 31 real GCC/Clang compiler bugs | 1 synthetic C workload + deterministic mechanism trace |
-| Reducers | HDD and Perses | Perses v2.7 + mechanism model |
-| Cache schemes | STR, ZIP, SHA, RCC (+ ablations) | no-cache vs RCC; mechanism-level canonical encoding/refresh |
-| Avoided queries | HDD 61.8%; Perses 24.3% average | see `results/live-perses-summary.json`; **not directly comparable** |
-| Peak RCC advantage | 96.4% HDD; 91.74% Perses vs second-best | not measured |
-| Level | paper-scale evaluation | L0 + scoped L2 |
+| Subjects | 31 real GCC/Clang compiler bugs | synthetic deterministic trace; tiny integration probes |
+| Reducers | HDD + Perses | RCC mechanism model; Perses integration audit |
+| Cache policies | no cache, STR, ZIP, SHA, RCC + ablations | model: no-cache vs RCC; live historical scaffold: no-cache vs RCC |
+| Queries avoided | HDD 61.8%; Perses 24.3% average | 88% synthetic model, intentionally non-comparable |
+| Peak memory advantage | RCC 96.4% HDD; 91.74% Perses vs second-best | not measured |
+| Actual level | paper-scale evaluation | L0 + scoped L2 mechanism |
 
-## Artifact/toolchain audit
+## Blockers and requirements for higher levels
 
-The official Perses repository still contains `doc/RCC.md`, the `benchmark/rcc-exp-script/` experiment driver, and current cache selections including `COMPACT_QUERY_CACHE`, `CONTENT_SHA_HASH`, `CONTENT_ZIP`, and `ORIG_CONTENT_STRING_BASED`. The 2026 v2.7 CLI also includes additional reducers and changed defaults, so a modern run is not a paper-era baseline unless those paths are controlled explicitly.
+The current public Perses release can no longer select RCC through the paper's documented cache-type flag, and the available v1.9 binary did not complete the tiny hosted-runner integration. A faithful live reproduction therefore needs either a paper-era Perses build/commit or a compatible historical environment in which `COMPACT_QUERY_CACHE` can be executed and profiled.
 
-The official reproduction guide recommends Ubuntu 20.04, Docker, x86 hardware, and 128 GB RAM for the full experiment; it also notes that building Perses in the benchmark Docker takes about 20 minutes. The full paper-scale run is therefore intentionally not placed in ordinary CI.
+The official RCC guide recommends Ubuntu 20.04, Docker, x86 hardware, and **128 GB RAM** for the full experiment; it also notes a roughly 20-minute Perses build inside the benchmark environment. Those requirements make the 31-subject experiment inappropriate for the default hosted Action.
 
 ## Threats and limitations
 
-The live workload is synthetic and tiny, so its duplicate rate is intentionally constructed and cannot estimate the paper's 24.3% Perses average. Current Perses v2.7 is several years newer than the paper implementation, and cache internals/default reducer composition may have drifted. GCC on `ubuntu-latest` is also not the historical compiler environment used by the 31 benchmark subjects. External test-script counts measure property-oracle executions, not Java object memory or cache-key memory.
+The mechanism fixture intentionally contains many duplicate candidates, so its query savings estimate is not externally valid. It models the two central RCC data-structure invariants but is not the Perses implementation. The current hosted GCC/JVM environment differs from the paper environment. Peak memory, cache-key allocation, refresh cost, and repeated-run variance are not measured. The failed historical integration has not been assigned a speculative root cause; it remains an explicit blocker.
 
 ## Most useful extension
 
-**Toolchain-drift × cache-policy cost matrix.** Re-run a small fixed set of post-paper GCC/LLVM bugs with paper-era Perses and v2.7 under no-cache / STR / SHA / RCC, holding reducer transformations and oracle budget constant. Record:
+**Toolchain-drift × cache-policy cost matrix.** Use a fixed set of post-paper GCC/LLVM bugs and compare a paper-era Perses build with a current build under no-cache / full-string / SHA / RCC policies, while holding reducer transformations and oracle budget constant. Record:
 
-- unique vs duplicate property queries;
+- unique and duplicate property queries;
 - wall time and property-test time separately;
 - peak cache bytes and bytes per retained key;
-- cache refresh events and stale-key removal fraction;
-- final reduced token count to catch any semantic/cache-safety regression.
+- refresh count and stale-key removal fraction;
+- final reduced token count and any cache-safety disagreement;
+- variance over repeated runs.
 
-This would distinguish whether RCC's advantage is stable under modern reducer pipelines or was partly coupled to the 2023 search order and benchmark distribution.
+This would show whether RCC's memory/query advantage survives modern reduction pipelines or was coupled to the 2023 search order and benchmark distribution.
 
 ## Path to higher levels
 
-**L1:** obtain/release the authors' raw 31-subject time/query/memory outputs and re-run the official CSV aggregation scripts, checking Tables 3–6.  
-**L3:** use the historical benchmark Docker/toolchains and paper-era Perses/HDD configuration on all 31 subjects with repeated runs and enough RAM.  
-**L4:** execute the toolchain-drift matrix above, ideally adding a fixed-memory-budget baseline and reporting variance across repeated runs.
+**L1:** obtain the authors' released/raw 31-subject query/time/memory outputs and recompute the paper tables with the official aggregation scripts.  
+**L2 official implementation:** execute `COMPACT_QUERY_CACHE` successfully on at least one fresh end-to-end reduction case and compare it with no-cache under the same reducer configuration.  
+**L3:** run the historical benchmark environment across all 31 compiler bugs with repeated measurements and sufficient RAM.  
+**L4:** execute the toolchain-drift/cache-policy matrix above with fixed budgets and statistical reporting.
