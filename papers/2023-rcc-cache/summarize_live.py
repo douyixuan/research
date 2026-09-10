@@ -20,9 +20,10 @@ if r > n:
     raise SystemExit(f"unexpected: RCC oracle calls {r} > no-cache {n}")
 
 summary = {
-    "level": "scoped L2 current-release Perses probe; not paper-scale L3 and not L1",
-    "perses_release": "v2.7",
-    "perses_sha256": "1102ec7e3e601792a3c271c41ac7df52b03fca635df552500c241933c2c1e427",
+    "level": "scoped L2 official RCC implementation probe on Perses v1.9; not L1/L3",
+    "perses_release": "v1.9",
+    "release_asset_size_bytes": 70349824,
+    "toolchain_drift": "Perses v2.7 removed the public --query-cache-type selector; v1.9 still exposes COMPACT_QUERY_CACHE",
     "input_bytes": input_bytes,
     "no_cache_oracle_calls": n,
     "rcc_oracle_calls": r,
@@ -32,10 +33,10 @@ summary = {
     "rcc_reduced_bytes": rcc_bytes,
     "same_reduced_text": no_text == rcc_text,
     "configuration": {
-        "nocache": "--edit-caching false --query-caching false",
-        "rcc": "--query-caching true --query-cache-type COMPACT_QUERY_CACHE",
+        "nocache": "--edit-caching false --query-caching FALSE",
+        "rcc": "--query-caching TRUE --query-cache-type COMPACT_QUERY_CACHE",
         "threads": 1,
-        "other_reducers_disabled": ["vulcan", "latra", "sfc", "lpr", "trec"],
+        "other_reducers_disabled": ["vulcan", "trec"],
     },
     "oracle": "gcc -O0 compile + process exit code == 12",
 }
