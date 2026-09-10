@@ -24,16 +24,21 @@ actual_sha256="$(sha256sum "$JAR" | awk '{print $1}')"
   exit 10
 }
 
+prepare_oracle() {
+  local out="$1"
+  local counter="$2"
+  sed "s|__COUNTER_FILE__|$counter|g" "$PAPER_DIR/oracle.sh" > "$out"
+  chmod +x "$out"
+}
+
 run_case() {
   local label="$1"; shift
   local dir="$WORK/$label"
+  local counter="$RESULTS/${label}.oracle-count"
   mkdir -p "$dir"
   cp "$PAPER_DIR/case/small.c" "$dir/small.c"
-  cp "$PAPER_DIR/oracle.sh" "$dir/oracle.sh"
-  chmod +x "$dir/oracle.sh"
-
-  export COUNTER_FILE="$RESULTS/${label}.oracle-count"
-  printf '0\n' > "$COUNTER_FILE"
+  printf '0\n' > "$counter"
+  prepare_oracle "$dir/oracle.sh" "$counter"
 
   if ! (
     cd "$dir"
@@ -68,10 +73,8 @@ run_case() {
   # Verify the final file without contaminating the measured oracle counter.
   local verify_counter="$RESULTS/${label}.verify-count"
   (
-    export COUNTER_FILE="$verify_counter"
     cd "$RESULTS"
-    cp "$PAPER_DIR/oracle.sh" oracle-check.sh
-    chmod +x oracle-check.sh
+    prepare_oracle oracle-check.sh "$verify_counter"
     cp "${label}.c" small.c
     ./oracle-check.sh
     rm -f small.c small.out oracle-check.sh
@@ -123,7 +126,7 @@ summary = {
         'threads': 1,
         'other_reducers_disabled': ['vulcan', 'latra', 'sfc', 'lpr', 'trec'],
     },
-    'oracle': 'requires 12 += occurrences, then gcc -O0 compile and execute',
+    'oracle': 'gcc -O0 compile + process exit code == 12',
 }
 print(json.dumps(summary, indent=2))
 PY
