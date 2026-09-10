@@ -53,6 +53,7 @@ The repository should never call an L1 result a full reproduction.
 | 2026-09-07 | [A Tale of Two DL Cities: When Library Tests Meet Compiler (OPERA)](papers/2025-opera/) | ICSE 2025 | L1 APFD + L0 artifact audit + scoped L2 prioritization mechanism | `paper-opera.yml` |
 | 2026-09-08 | [Compilation Consistency Modulo Debug Information (CCMD / Dfusor)](papers/2023-ccmd/) | ASPLOS 2023 | L0 artifact audit + scoped L2 live-minimal | `paper-ccmd.yml` |
 | 2026-09-09 | [LPR: Large Language Models-Aided Program Reduction](papers/2024-lpr/) | ISSTA 2024 | L1 partial (released-output reprocessing) | `paper-lpr.yml` |
+| 2026-09-10 | [On the Caching Schemes to Speed Up Program Reduction (RCC)](papers/2023-rcc-cache/) | ACM TOSEM 33(1), 2023 | L0 artifact/toolchain audit + scoped L2 mechanism | `paper-rcc-cache.yml` |
 
 ## Daily workflow
 
