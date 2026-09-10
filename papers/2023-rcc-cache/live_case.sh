@@ -8,7 +8,7 @@ PAPER_DIR="$(cd "$(dirname "$0")" && pwd)"
 RESULTS="$PAPER_DIR/results"
 WORK="$PAPER_DIR/.work"
 # v2.7 removed the public --query-cache-type selector while leaving the old RCC
-# benchmark scripts in-tree. v1.9 is the newest tagged release whose published
+# benchmark scripts in-tree. v1.9 is a tagged post-paper release whose published
 # CLI usage still exposes COMPACT_QUERY_CACHE, so use it for the live RCC probe.
 PERSES_VERSION="v1.9"
 PERSES_SIZE="70349824"
@@ -35,18 +35,17 @@ sed "s|__COUNTER_FILE__|$counter|g" "$PAPER_DIR/oracle.sh" > "$dir/oracle.sh"
 chmod +x "$dir/oracle.sh"
 
 case "$label" in
-  nocache) cache_flags=(--edit-caching false --query-caching FALSE) ;;
+  nocache) cache_flags=(--query-caching FALSE) ;;
   rcc) cache_flags=(--query-caching TRUE --query-cache-type COMPACT_QUERY_CACHE) ;;
 esac
 
+# Keep the invocation deliberately minimal so it matches the v1.9 published CLI
+# rather than today's reducer defaults/options.
 if ! (
   cd "$dir"
   java -jar "$JAR" \
     "${cache_flags[@]}" \
-    --enable-vulcan false \
-    --enable-trec false \
     --threads 1 \
-    --code-format ORIG_FORMAT \
     --test-script oracle.sh \
     --input-file small.c \
     --output-dir out \
