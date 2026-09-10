@@ -1,0 +1,44 @@
+name: paper-rcc-cache
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'papers/2023-rcc-cache/**'
+      - '.github/workflows/paper-rcc-cache.yml'
+  pull_request:
+    paths:
+      - 'papers/2023-rcc-cache/**'
+      - '.github/workflows/paper-rcc-cache.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  scoped-l2:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v6
+      - name: Environment
+        run: |
+          python3 --version
+          java -version
+          gcc --version | head -n1
+      - name: Syntax check
+        run: bash -n papers/2023-rcc-cache/reproduce.sh papers/2023-rcc-cache/oracle.sh
+      - name: Reproduce RCC mechanism and current Perses probe
+        run: bash papers/2023-rcc-cache/reproduce.sh
+      - name: Show evidence
+        if: always()
+        run: |
+          test -f papers/2023-rcc-cache/results/mechanism-summary.json && cat papers/2023-rcc-cache/results/mechanism-summary.json || true
+          test -f papers/2023-rcc-cache/results/live-perses-summary.json && cat papers/2023-rcc-cache/results/live-perses-summary.json || true
+      - name: Upload reproduction evidence
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: rcc-cache-reproduction
+          path: papers/2023-rcc-cache/results/
+          if-no-files-found: error
