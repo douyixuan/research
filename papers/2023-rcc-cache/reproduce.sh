@@ -79,9 +79,11 @@ run_case() {
   rm -f "$verify_counter"
 }
 
-# Current-release probe of the paper's official Perses implementation.
-run_case nocache --query-caching FALSE
-run_case rcc --query-caching TRUE --query-cache-type COMPACT_QUERY_CACHE
+# Match the flags used by the official RCC reproduction scripts. The no-cache
+# arm disables both edit caching and query caching; the RCC arm explicitly
+# selects the paper cache type.
+run_case nocache --edit-caching false --query-caching false
+run_case rcc --query-caching true --query-cache-type COMPACT_QUERY_CACHE
 
 NO_CACHE_CALLS="$(cat "$RESULTS/nocache.oracle-count")"
 RCC_CALLS="$(cat "$RESULTS/rcc.oracle-count")"
@@ -116,8 +118,8 @@ summary = {
     'rcc_reduced_bytes': int(os.environ['RCC_BYTES']),
     'same_reduced_text': os.environ['SAME_TEXT'].lower() == 'true',
     'configuration': {
-        'nocache': '--query-caching FALSE',
-        'rcc': '--query-caching TRUE --query-cache-type COMPACT_QUERY_CACHE',
+        'nocache': '--edit-caching false --query-caching false',
+        'rcc': '--query-caching true --query-cache-type COMPACT_QUERY_CACHE',
         'threads': 1,
         'other_reducers_disabled': ['vulcan', 'latra', 'sfc', 'lpr', 'trec'],
     },
