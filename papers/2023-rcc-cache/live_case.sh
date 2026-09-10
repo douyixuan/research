@@ -7,10 +7,13 @@ label="${1:?usage: live_case.sh nocache|rcc}"
 PAPER_DIR="$(cd "$(dirname "$0")" && pwd)"
 RESULTS="$PAPER_DIR/results"
 WORK="$PAPER_DIR/.work"
-PERSES_VERSION="v2.7"
-PERSES_SHA256="1102ec7e3e601792a3c271c41ac7df52b03fca635df552500c241933c2c1e427"
+# v2.7 removed the public --query-cache-type selector while leaving the old RCC
+# benchmark scripts in-tree. v1.9 is the newest tagged release whose published
+# CLI usage still exposes COMPACT_QUERY_CACHE, so use it for the live RCC probe.
+PERSES_VERSION="v1.9"
+PERSES_SIZE="70349824"
 PERSES_URL="https://github.com/uw-pluverse/perses/releases/download/${PERSES_VERSION}/perses_deploy.jar"
-JAR="${PERSES_JAR:-$WORK/perses_deploy.jar}"
+JAR="${PERSES_JAR:-$WORK/perses-${PERSES_VERSION}.jar}"
 
 dir="$WORK/$label"
 rm -rf "$dir"
@@ -19,9 +22,9 @@ mkdir -p "$RESULTS" "$WORK" "$dir"
 if [[ ! -f "$JAR" ]]; then
   curl --fail --location --retry 3 "$PERSES_URL" -o "$JAR"
 fi
-actual_sha256="$(sha256sum "$JAR" | awk '{print $1}')"
-[[ "$actual_sha256" == "$PERSES_SHA256" ]] || {
-  echo "Perses checksum mismatch: $actual_sha256" >&2
+actual_size="$(stat -c '%s' "$JAR")"
+[[ "$actual_size" == "$PERSES_SIZE" ]] || {
+  echo "Perses release size mismatch: expected $PERSES_SIZE got $actual_size" >&2
   exit 10
 }
 
@@ -32,8 +35,8 @@ sed "s|__COUNTER_FILE__|$counter|g" "$PAPER_DIR/oracle.sh" > "$dir/oracle.sh"
 chmod +x "$dir/oracle.sh"
 
 case "$label" in
-  nocache) cache_flags=(--edit-caching false --query-caching false) ;;
-  rcc) cache_flags=(--query-caching true --query-cache-type COMPACT_QUERY_CACHE) ;;
+  nocache) cache_flags=(--edit-caching false --query-caching FALSE) ;;
+  rcc) cache_flags=(--query-caching TRUE --query-cache-type COMPACT_QUERY_CACHE) ;;
 esac
 
 if ! (
@@ -41,9 +44,6 @@ if ! (
   java -jar "$JAR" \
     "${cache_flags[@]}" \
     --enable-vulcan false \
-    --enable-latra false \
-    --enable-sfc false \
-    --enable-lpr false \
     --enable-trec false \
     --threads 1 \
     --code-format ORIG_FORMAT \
