@@ -20,7 +20,7 @@ if r > n:
     raise SystemExit(f"unexpected: RCC oracle calls {r} > no-cache {n}")
 
 summary = {
-    "level": "scoped L2 official RCC implementation probe on Perses v1.9; not L1/L3",
+    "level": "scoped L2 official RCC implementation probe on Perses v1.9; only valid if this manual run completes",
     "perses_release": "v1.9",
     "release_asset_size_bytes": 70349824,
     "toolchain_drift": "Perses v2.7 removed the public --query-cache-type selector; v1.9 still exposes COMPACT_QUERY_CACHE",
@@ -33,10 +33,9 @@ summary = {
     "rcc_reduced_bytes": rcc_bytes,
     "same_reduced_text": no_text == rcc_text,
     "configuration": {
-        "nocache": "--edit-caching false --query-caching FALSE",
+        "nocache": "--query-caching FALSE",
         "rcc": "--query-caching TRUE --query-cache-type COMPACT_QUERY_CACHE",
         "threads": 1,
-        "other_reducers_disabled": ["vulcan", "trec"],
     },
     "oracle": "gcc -O0 compile + process exit code == 12",
 }
