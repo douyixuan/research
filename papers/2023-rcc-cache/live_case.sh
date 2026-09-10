@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-label="${1:?usage: live_case.sh nocache|rcc}"
-[[ "$label" == "nocache" || "$label" == "rcc" ]] || { echo "unknown case: $label" >&2; exit 2; }
+label="${1:?usage: live_case.sh default|nocache|rcc}"
+[[ "$label" == "default" || "$label" == "nocache" || "$label" == "rcc" ]] || { echo "unknown case: $label" >&2; exit 2; }
 
 PAPER_DIR="$(cd "$(dirname "$0")" && pwd)"
 RESULTS="$PAPER_DIR/results"
@@ -34,7 +34,9 @@ printf '0\n' > "$counter"
 sed "s|__COUNTER_FILE__|$counter|g" "$PAPER_DIR/oracle.sh" > "$dir/oracle.sh"
 chmod +x "$dir/oracle.sh"
 
+cache_flags=()
 case "$label" in
+  default) cache_flags=() ;;
   nocache) cache_flags=(--query-caching FALSE) ;;
   rcc) cache_flags=(--query-caching TRUE --query-cache-type COMPACT_QUERY_CACHE) ;;
 esac
