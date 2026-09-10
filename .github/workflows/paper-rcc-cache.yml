@@ -11,6 +11,12 @@ on:
       - 'papers/2023-rcc-cache/**'
       - '.github/workflows/paper-rcc-cache.yml'
   workflow_dispatch:
+    inputs:
+      historical_live:
+        description: 'Also attempt the Perses v1.9 live RCC probe'
+        required: false
+        default: false
+        type: boolean
 
 permissions:
   contents: read
@@ -21,14 +27,9 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v6
-      - uses: actions/setup-java@v5
-        with:
-          distribution: temurin
-          java-version: '21'
       - name: Environment
         run: |
           python3 --version
-          java -version
           gcc --version | head -n1
       - name: Syntax check
         run: bash -n papers/2023-rcc-cache/reproduce.sh papers/2023-rcc-cache/live_case.sh papers/2023-rcc-cache/oracle.sh
@@ -38,13 +39,22 @@ jobs:
           mkdir -p papers/2023-rcc-cache/results papers/2023-rcc-cache/.work
       - name: Deterministic RCC mechanism model
         run: python3 papers/2023-rcc-cache/reproduce.py
+      - uses: actions/setup-java@v5
+        if: github.event_name == 'workflow_dispatch' && inputs.historical_live
+        with:
+          distribution: temurin
+          java-version: '21'
       - name: Perses v1.9 default-cache diagnostic
+        if: github.event_name == 'workflow_dispatch' && inputs.historical_live
         run: bash papers/2023-rcc-cache/live_case.sh default
       - name: Perses v1.9 no-cache case
+        if: github.event_name == 'workflow_dispatch' && inputs.historical_live
         run: bash papers/2023-rcc-cache/live_case.sh nocache
       - name: Perses v1.9 RCC case
+        if: github.event_name == 'workflow_dispatch' && inputs.historical_live
         run: bash papers/2023-rcc-cache/live_case.sh rcc
       - name: Compare live cases
+        if: github.event_name == 'workflow_dispatch' && inputs.historical_live
         run: python3 papers/2023-rcc-cache/summarize_live.py
       - name: Show evidence
         if: always()
