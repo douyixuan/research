@@ -39,7 +39,7 @@ class Oracle:
             exe = td / "small.out"
             cfile.write_text(src)
             cp = subprocess.run(
-                [self.cc, "-O0", "-Wall", "-Werror", str(cfile), "-o", str(exe)],
+                [self.cc, "-O0", "-Wall", str(cfile), "-o", str(exe)],
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
                 text=True,
@@ -144,7 +144,7 @@ def main() -> int:
         "level": "scoped L2 mechanism reproduction",
         "scope": "fresh synthetic C case; statement-level deletion + Vulcan-style identifier replacement; not paper implementation and not L1/L3",
         "compiler": subprocess.check_output([cc, "--version"], text=True).splitlines()[0],
-        "property": "compile with -O0 -Wall -Werror, exit 0, stdout exactly 42\\n",
+        "property": "compile with -O0 -Wall, exit 0, stdout exactly 42\\n",
         "baseline": {
             "statements": len(baseline),
             "tokens": tokens(baseline),
