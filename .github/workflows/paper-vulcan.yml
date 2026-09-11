@@ -1,0 +1,41 @@
+name: paper-vulcan
+
+on:
+  push:
+    paths:
+      - 'papers/2023-vulcan/**'
+      - '.github/workflows/paper-vulcan.yml'
+  pull_request:
+    paths:
+      - 'papers/2023-vulcan/**'
+      - '.github/workflows/paper-vulcan.yml'
+  workflow_dispatch:
+
+jobs:
+  reproduce:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Environment
+        run: |
+          gcc --version | head -1
+          java -version
+          python3 --version
+      - name: Run scoped L2 and current-Perses probe
+        run: |
+          chmod +x papers/2023-vulcan/reproduce.sh papers/2023-vulcan/probe_current_perses.sh papers/2023-vulcan/oracle.sh
+          ./papers/2023-vulcan/reproduce.sh | tee papers/2023-vulcan/results/ci.log
+      - name: Show summaries
+        if: always()
+        run: |
+          find papers/2023-vulcan/results -maxdepth 1 -type f -print || true
+          cat papers/2023-vulcan/results/mechanism-summary.json || true
+          cat papers/2023-vulcan/results/current-perses-summary.json || true
+      - name: Upload reproduction evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: vulcan-reproduction
+          path: papers/2023-vulcan/results/
+          if-no-files-found: error
