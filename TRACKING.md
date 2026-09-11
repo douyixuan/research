@@ -1,6 +1,6 @@
 # Yongqiang Tian paper tracker
 
-Last public-source sweep: **2026-09-08**.
+Last public-source sweep: **2026-09-11**.
 
 This file separates the discovery queue from completed reproduction directories. It intentionally includes preprints and tool demonstrations that may not yet be prominent in Scholar/DBLP so they do not get lost between daily runs.
 
@@ -30,6 +30,9 @@ This file separates the discovery queue from completed reproduction directories.
 | Weighted Delta Debugging (WDD) | ICSE 2025 | ✅ `papers/2025-wdd/` — L1 partial + scoped L2 |
 | Toward a Better Understanding of Probabilistic Delta Debugging (CDD) | ICSE 2025 | ✅ `papers/2025-cdd/` — L1 partial + scoped L2 |
 | A Tale of Two DL Cities: When Library Tests Meet Compiler (OPERA) | ICSE 2025 | ✅ `papers/2025-opera/` — L1 + scoped L2 |
+| LPR: Large Language Models-Aided Program Reduction | ISSTA 2024 | ✅ `papers/2024-lpr/` — L1 partial |
+| On the Caching Schemes to Speed Up Program Reduction (RCC) | TOSEM 2023 | ✅ `papers/2023-rcc/` — L0 artifact audit + scoped L2 |
+| Pushing the Limit of 1-Minimality of Language-Agnostic Program Reduction (Vulcan) | OOPSLA 2023 | ✅ `papers/2023-vulcan/` — L0 artifact/implementation audit + scoped L2 |
 | Compilation Consistency Modulo Debug Information (CCMD / Dfusor) | ASPLOS 2023 | ✅ `papers/2023-ccmd/` — L0 artifact audit + scoped L2 |
 
 ## Discovery sources
@@ -40,12 +43,12 @@ This file separates the discovery queue from completed reproduction directories.
 - ACM/IEEE/conference publication pages
 - official artifacts and GitHub repositories
 
-## Discovery note (2026-09-08)
+## Discovery note (2026-09-11)
 
-A fresh sweep of Yongqiang Tian's publication page, DBLP/arXiv indexing, and targeted searches did not surface a new untracked 2026 compiler/testing/program-reduction paper that should preempt the queue. The highest-value unfinished compiler-testing item located outside the already completed set was **Compilation Consistency Modulo Debug Information (ASPLOS 2023)**.
+A fresh sweep of Yongqiang Tian's publication page, Monash profile, arXiv indexing, DBLP/web indexing, and targeted September searches did not surface a new untracked 2026 compiler/testing/program-reduction paper that should preempt the queue. The highest-value unfinished program-reduction paper was **Pushing the Limit of 1-Minimality of Language-Agnostic Program Reduction (OOPSLA 2023)**.
 
-Today's reproduction verifies the archived Dfusor artifact description and implements a fresh deterministic CCMD oracle over paper-inspired RCL/OCP/FCO fixtures. The scoped experiment compares GCC/Clang builds with and without `-g3`, checks `.text` identity and runtime output at `-O0/-O2`, and measures DWARF amplification. It is recorded as **L0 + scoped L2**, not L1/L3; the official Dfusor Docker artifact is ~15 GB and the paper-scale randomized campaign is intentionally kept out of hosted CI.
+The official Zenodo artifact is public and contains source, benchmarks, scripts, and documentation, but its documented C/Rust environment occupies nearly 100 GB and full experiments take many hours to multiple days. Today's lane therefore records **L0 + scoped L2**, not L1/L3: a fresh compile/run case demonstrates the local-minimum escape mechanism, while a separate checksum-pinned Perses v2.7 probe checks modern implementation drift with later transformation systems disabled.
 
 ## Next queue
 
-Re-scan 2026 first. If nothing new appears, continue backward through unfinished compiler/testing work, favoring papers with public artifacts or historical compiler bugs that can be converted into modern regression tests.
+Re-scan 2026 first. If nothing new appears, continue backward through unfinished compiler/testing work. High-value candidates include PPR (ESEC/FSE 2023), Ad Hoc Syntax-Guided Program Reduction (ESEC/FSE 2023 Tool), Revisiting the Evaluation of Deep Learning-Based Compiler Testing (IJCAI 2023), and HirGen (ISSTA 2023).
