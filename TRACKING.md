@@ -1,6 +1,6 @@
 # Yongqiang Tian paper tracker
 
-Last public-source sweep: **2026-09-11**.
+Last public-source sweep: **2026-09-12**.
 
 This file separates the discovery queue from completed reproduction directories. It intentionally includes preprints and tool demonstrations that may not yet be prominent in Scholar/DBLP so they do not get lost between daily runs.
 
@@ -34,6 +34,7 @@ This file separates the discovery queue from completed reproduction directories.
 | On the Caching Schemes to Speed Up Program Reduction (RCC) | TOSEM 2023 | ✅ `papers/2023-rcc/` — L0 artifact audit + scoped L2 |
 | Pushing the Limit of 1-Minimality of Language-Agnostic Program Reduction (Vulcan) | OOPSLA 2023 | ✅ `papers/2023-vulcan/` — L0 artifact/implementation audit + scoped L2 |
 | Compilation Consistency Modulo Debug Information (CCMD / Dfusor) | ASPLOS 2023 | ✅ `papers/2023-ccmd/` — L0 artifact audit + scoped L2 |
+| PPR: Pairwise Program Reduction | ESEC/FSE 2023 | ✅ `papers/2023-ppr/` — L0 artifact audit + official current-source scoped L2 + independent scoped L2 |
 
 ## Discovery sources
 
@@ -43,12 +44,12 @@ This file separates the discovery queue from completed reproduction directories.
 - ACM/IEEE/conference publication pages
 - official artifacts and GitHub repositories
 
-## Discovery note (2026-09-11)
+## Discovery note (2026-09-12)
 
-A fresh sweep of Yongqiang Tian's publication page, Monash profile, arXiv indexing, DBLP/web indexing, and targeted September searches did not surface a new untracked 2026 compiler/testing/program-reduction paper that should preempt the queue. The highest-value unfinished program-reduction paper was **Pushing the Limit of 1-Minimality of Language-Agnostic Program Reduction (OOPSLA 2023)**.
+A fresh sweep of Yongqiang Tian's publication page, Monash profile, arXiv/DBLP indexing, and targeted searches did not surface a new untracked 2026 compiler/testing/program-reduction paper that should preempt the queue. The next highest-value unfinished program-reduction paper was **PPR: Pairwise Program Reduction (ESEC/FSE 2023)**.
 
-The official Zenodo artifact is public and contains source, benchmarks, scripts, and documentation, but its documented C/Rust environment occupies nearly 100 GB and full experiments take many hours to multiple days. Today's lane therefore records **L0 + scoped L2**, not L1/L3: a fresh compile/run case demonstrates the local-minimum escape mechanism, while a separate checksum-pinned Perses v2.7 probe checks modern implementation drift with later transformation systems disabled.
+PPR is now reproduced at **L0 + scoped L2**, not L1/L3. The official source and Benchmark-PPR are public in `uw-pluverse/perses`, and the paper artifact is indexed at Zenodo `10.5281/zenodo.8267114`. A fresh compile/execute pairwise-reduction probe reduced a three-change variant difference to one critical changed-statement proxy, while a separate CI lane built and ran the current official PPR implementation from pinned Perses source. Paper-scale historical results were not rerun.
 
 ## Next queue
 
-Re-scan 2026 first. If nothing new appears, continue backward through unfinished compiler/testing work. High-value candidates include PPR (ESEC/FSE 2023), Ad Hoc Syntax-Guided Program Reduction (ESEC/FSE 2023 Tool), Revisiting the Evaluation of Deep Learning-Based Compiler Testing (IJCAI 2023), and HirGen (ISSTA 2023).
+Re-scan 2026 first. If nothing new appears, continue backward through unfinished compiler/testing work. High-value candidates are **Ad Hoc Syntax-Guided Program Reduction (ESEC/FSE 2023 Tool)**, **Revisiting the Evaluation of Deep Learning-Based Compiler Testing (IJCAI 2023)**, and **Fuzzing Deep Learning Compilers with HirGen (ISSTA 2023)**.
