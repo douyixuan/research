@@ -16,10 +16,11 @@ These numbers are **reference claims only** in this directory; this run does not
 
 ## Reproduction level
 
-**Current level: L0 official-artifact audit + scoped L2 mechanism reproduction.**
+**Current level: L0 official-artifact audit + official current-source scoped L2 + independent scoped L2 mechanism reproduction.**
 
 - **L0:** official implementation and Benchmark-PPR are public in `uw-pluverse/perses`; the paper also points to Zenodo artifact `10.5281/zenodo.8267114`.
-- **Scoped L2:** `reproduce.py` performs a fresh compile-and-execute pairwise reduction on a new tiny C pair using GCC. It explicitly reduces variant-only differences and common statements while preserving the two distinct program properties.
+- **Official scoped L2:** the pinned current Perses PPR implementation was built and actually run in GitHub Actions on a fresh tiny C pair with a compile-and-execute oracle.
+- **Independent scoped L2:** `reproduce.py` separately models difference-first pairwise reduction on the same fresh pair using GCC.
 - **Not L1:** released paper-scale result files were not reprocessed here.
 - **Not L3:** the 20 C bugs, historical compiler versions, and paper-scale 24 h budgets were not rerun.
 
@@ -35,11 +36,19 @@ The oracle requires:
 - seed compiles and prints `1`;
 - variant compiles and prints `2`.
 
-The deterministic result is written to `results/result.json`.
+The deterministic mechanism result is written to `results/result.json`.
 
-## Scoped L2 result
+The official-current-source lane is:
 
-The fresh case begins with three variant-only statement changes. The reducer preserves only the critical `a++;` mutation while deleting irrelevant changes and common code:
+```bash
+./probe_official_ppr.sh
+```
+
+## Scoped L2 results
+
+### Independent mechanism probe
+
+The fresh case begins with three variant-only statement changes. The compact reducer preserves only the critical `a++;` mutation while deleting irrelevant changes and common code:
 
 | metric | original | reduced |
 |---|---:|---:|
@@ -48,7 +57,26 @@ The fresh case begins with three variant-only statement changes. The reducer pre
 | changed-statement proxy | 3 | 1 |
 | compile/run oracle calls | - | 19 |
 
-The result demonstrates the central mechanism: minimizing the pair can simultaneously shrink both programs and isolate a single property-changing difference. This is deliberately a mechanism-level L2, not a claim about PPR's paper-scale effectiveness.
+This demonstrates the central mechanism: minimizing the pair can simultaneously shrink both programs and isolate a property-changing difference. It is a mechanism-level L2, not a paper-scale effectiveness claim.
+
+### Official PPR current-source probe
+
+GitHub Actions successfully cloned and checked out Perses commit `6c6ae0db20fa83b0f85a71ca447f0c4d5e056bd2` (2026-08-27), built the official `//ppr/src/org/perses/ppr:main` target with Bazel 9.1.0, and executed PPR on the tiny pair.
+
+Observed CI result:
+
+| metric | official current PPR |
+|---|---:|
+| minimized seed | 26 tokens |
+| minimized variant | 29 tokens |
+| final tree-diff | 3 nodes |
+| PPR execution time | 0.493 s |
+| cold Bazel build | 1206.7 s (~20 min) |
+| reduction status | success / parsable / no errors |
+
+The official PPR `tree-diff` node count is **not the same metric** as the independent probe's changed-statement proxy, so `3 nodes` and `1 statement` must not be compared numerically.
+
+Both CI evidence bundles are uploaded as `ppr-reproduction` and `ppr-official-current-source` artifacts.
 
 ## Official artifact / implementation audit
 
@@ -56,27 +84,28 @@ Official source: `https://github.com/uw-pluverse/perses/tree/master/ppr`
 
 Benchmark: `https://github.com/uw-pluverse/perses/tree/master/benchmark/benchmark_ppr`
 
-Current audited Perses commit: `6c6ae0db20fa83b0f85a71ca447f0c4d5e056bd2` (2026-08-27). The current build uses Bazel 9.1.0. `probe_official_ppr.sh` is an executable CI scaffold that clones that exact commit, builds the official PPR entry point, and runs it on this tiny pair. The main workflow keeps this job separate because rebuilding current Perses is much heavier than the deterministic scoped L2 probe.
+Current audited Perses commit: `6c6ae0db20fa83b0f85a71ca447f0c4d5e056bd2` (2026-08-27). The current build uses Bazel 9.1.0. `probe_official_ppr.sh` pins that exact commit, builds the official PPR entry point, runs it on the tiny pair, and archives the outputs. The ~20 minute cold build is materially heavier than the deterministic independent probe.
 
 ## Paper vs reproduction
 
 | Aspect | Paper | This reproduction |
 |---|---|---|
 | target | 20 GCC/LLVM bug pairs + Rust/JS generality | 1 fresh C pair |
-| reducer | official PPR over Perses | compact mechanism model; official lane scaffolded separately |
+| reducer | official PPR over Perses | official current PPR + independent mechanism probe |
 | property | historical compiler bugs | distinct compile+execute outputs |
-| difference reduction | tree + list | statement-level variant-only deletion |
-| commonality reduction | syntax-guided tree deletion | paired common-statement deletion |
-| result | 27,880 -> 24 mean diff tokens on C benchmark | 3 -> 1 changed-statement proxy |
+| difference reduction | tree + list | official current PPR; independent statement-level proxy |
+| commonality reduction | syntax-guided tree deletion | official current PPR; independent paired common-statement deletion |
+| result | 27,880 -> 24 mean diff tokens on C benchmark | official: 26/29 tokens, 3 tree-diff nodes; independent: 3 -> 1 statement proxy |
 | level | paper experiment | scoped L2 only |
 
 ## Threats / limitations
 
 1. The tiny test does not model real compiler crash/hang/miscompilation or undefined-behavior screening.
-2. Statement-level diff is only a proxy for PPR's syntax/tree and token-based difference representation.
+2. The independent statement-level diff is only a proxy for PPR's syntax/tree and token-based representation.
 3. Compiler/toolchain drift is substantial: current Perses (2026) is not the paper-era implementation environment.
 4. One deterministic case cannot estimate variance, runtime scaling, or PPR-vs-DD/Perses/C-Reduce effectiveness.
-5. Full historical compiler reproduction may require old toolchains, large memory, and long per-case timeouts.
+5. The official-current-source run validates present-day executability, not historical benchmark reproducibility.
+6. Full historical compiler reproduction may require old toolchains, large memory, and long per-case timeouts.
 
 ## Most useful next experiment (L4)
 
@@ -92,6 +121,5 @@ Measure final variant tokens, final diff tokens, oracle calls, wall-clock time, 
 ## Upgrade path
 
 - **L1:** obtain/reprocess the released paper result tables/logs from Zenodo and recalculate Table 1/2/3 aggregates.
-- **L2 official:** run `probe_official_ppr.sh` successfully against the pinned official source and archive outputs.
 - **L3:** reconstruct historical GCC/LLVM versions and rerun the 20 C Benchmark-PPR cases with paper-like timeout/resources.
 - **L4:** run the fixed-budget mutation-localization experiment above on newer compiler bugs.
