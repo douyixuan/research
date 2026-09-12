@@ -1,0 +1,45 @@
+name: paper-ppr
+
+on:
+  push:
+    paths:
+      - 'papers/2023-ppr/**'
+      - '.github/workflows/paper-ppr.yml'
+  pull_request:
+    paths:
+      - 'papers/2023-ppr/**'
+      - '.github/workflows/paper-ppr.yml'
+  workflow_dispatch:
+
+jobs:
+  scoped-l2:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run deterministic pairwise reduction probe
+        run: bash papers/2023-ppr/reproduce.sh
+      - name: Upload scoped reproduction evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: ppr-reproduction
+          path: papers/2023-ppr/results/
+          if-no-files-found: error
+
+  official-current-source:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.24.x'
+      - name: Build and run official PPR on the tiny pair
+        run: bash papers/2023-ppr/probe_official_ppr.sh
+      - name: Upload official PPR evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ppr-official-current-source
+          path: papers/2023-ppr/results/official/
+          if-no-files-found: warn

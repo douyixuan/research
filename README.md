@@ -55,6 +55,7 @@ The repository should never call an L1 result a full reproduction.
 | 2026-09-09 | [LPR: Large Language Models-Aided Program Reduction](papers/2024-lpr/) | ISSTA 2024 | L1 partial (released-output reprocessing) | `paper-lpr.yml` |
 | 2026-09-10 | [On the Caching Schemes to Speed Up Program Reduction (RCC)](papers/2023-rcc/) | ACM TOSEM 33(1) | L0 official-artifact audit + scoped L2 fresh caching mechanism | `paper-rcc.yml` |
 | 2026-09-11 | [Pushing the Limit of 1-Minimality of Language-Agnostic Program Reduction (Vulcan)](papers/2023-vulcan/) | OOPSLA 2023 | L0 official-artifact / implementation audit + scoped L2 mechanism + current-Perses drift probe | `paper-vulcan.yml` |
+| 2026-09-12 | [PPR: Pairwise Program Reduction](papers/2023-ppr/) | ESEC/FSE 2023 | L0 official-artifact audit + official current-source scoped L2 + independent scoped L2 | `paper-ppr.yml` ✅ |
 
 ## Daily workflow
 
