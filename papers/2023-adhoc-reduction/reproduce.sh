@@ -46,6 +46,7 @@ java -jar "${installer}" \
   --token-names-of-identifiers Identifier \
   --package-name org.perses.grammar.adhoc.minicalc \
   --language-kind-yaml-file "${ROOT}/grammar/language_kind.yaml" \
+  --enable-pnf-normalization true \
   --output "${OUT}/minicalc.jar" \
   2>&1 | tee "${OUT}/adhoc-compiler.log"
 gen_end_ns="$(date +%s%N)"
@@ -58,6 +59,8 @@ java -jar "${perses}" \
   --test-script "${CASE_DIR}/r.sh" \
   --language-ext-jars "${OUT}/minicalc.jar" \
   --threads 1 \
+  --fully-deterministic-mode true \
+  --enable-latra false \
   --enable-vulcan false \
   --enable-trec false \
   --output-dir "${REDUCED_DIR}" \
