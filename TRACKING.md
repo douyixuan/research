@@ -1,6 +1,6 @@
 # Yongqiang Tian paper tracker
 
-Last public-source sweep: **2026-09-12**.
+Last public-source sweep: **2026-09-13**.
 
 This file separates the discovery queue from completed reproduction directories. It intentionally includes preprints and tool demonstrations that may not yet be prominent in Scholar/DBLP so they do not get lost between daily runs.
 
@@ -35,6 +35,7 @@ This file separates the discovery queue from completed reproduction directories.
 | Pushing the Limit of 1-Minimality of Language-Agnostic Program Reduction (Vulcan) | OOPSLA 2023 | ✅ `papers/2023-vulcan/` — L0 artifact/implementation audit + scoped L2 |
 | Compilation Consistency Modulo Debug Information (CCMD / Dfusor) | ASPLOS 2023 | ✅ `papers/2023-ccmd/` — L0 artifact audit + scoped L2 |
 | PPR: Pairwise Program Reduction | ESEC/FSE 2023 | ✅ `papers/2023-ppr/` — L0 artifact audit + official current-source scoped L2 + independent scoped L2 |
+| Ad Hoc Syntax-Guided Program Reduction | ESEC/FSE 2023 Tool | ✅ `papers/2023-adhoc/` — L0 claim/artifact audit + current-source scoped L2 |
 
 ## Discovery sources
 
@@ -44,12 +45,14 @@ This file separates the discovery queue from completed reproduction directories.
 - ACM/IEEE/conference publication pages
 - official artifacts and GitHub repositories
 
-## Discovery note (2026-09-12)
+## Discovery note (2026-09-13)
 
-A fresh sweep of Yongqiang Tian's publication page, Monash profile, arXiv/DBLP indexing, and targeted searches did not surface a new untracked 2026 compiler/testing/program-reduction paper that should preempt the queue. The next highest-value unfinished program-reduction paper was **PPR: Pairwise Program Reduction (ESEC/FSE 2023)**.
+A fresh sweep of Yongqiang Tian's publication page, Monash profile, arXiv indexing, DBLP mirrors, and targeted GitHub/artifact searches did not surface a new untracked 2026 compiler/testing/program-reduction paper that should preempt the queue. The highest-value unfinished program-reduction paper was **Ad Hoc Syntax-Guided Program Reduction (ESEC/FSE 2023 Tool)**.
 
-PPR is now reproduced at **L0 + scoped L2**, not L1/L3. The official source and Benchmark-PPR are public in `uw-pluverse/perses`, and the paper artifact is indexed at Zenodo `10.5281/zenodo.8267114`. A fresh compile/execute pairwise-reduction probe reduced a three-change variant difference to one critical changed-statement proxy, while a separate CI lane built and ran the current official PPR implementation from pinned Perses source. Paper-scale historical results were not rerun.
+The paper is now covered at **L0 claim/artifact audit + current-source scoped L2**, not L1/L3. The original paper reports identical final token counts for native Perses and `Perses^ad_hoc` on five compiler bugs, 1,191 s vs 1,222 s mean reduction time, and roughly 10 s average grammar-library generation. Today's workflow pins the current official Perses source, builds the ad-hoc grammar installer, generates a dynamic language JAR, performs a real tiny reduction through `--language-ext-jars`, runs a native-C control, and also executes the upstream official ad-hoc system test. Historical five-bug experiments were not rerun.
+
+A contemporary packaging drift was also recorded: Perses v2.7's release assets contain the main Perses/Kitten JARs but not the ad-hoc installer JAR, so the documented ad-hoc path still starts with a source build.
 
 ## Next queue
 
-Re-scan 2026 first. If nothing new appears, continue backward through unfinished compiler/testing work. High-value candidates are **Ad Hoc Syntax-Guided Program Reduction (ESEC/FSE 2023 Tool)**, **Revisiting the Evaluation of Deep Learning-Based Compiler Testing (IJCAI 2023)**, and **Fuzzing Deep Learning Compilers with HirGen (ISSTA 2023)**.
+Re-scan 2026 first. If nothing new appears, continue backward through unfinished compiler/testing work. High-value candidates are **Revisiting the Evaluation of Deep Learning-Based Compiler Testing (IJCAI 2023)**, **Fuzzing Deep Learning Compilers with HirGen (ISSTA 2023)**, and **Towards Understanding the Bugs in Solidity Compiler (ISSTA 2024)**.
