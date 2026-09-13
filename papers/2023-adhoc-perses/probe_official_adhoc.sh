@@ -60,8 +60,10 @@ run_end=$(date +%s)
 
 RESULT="${CASE_DIR}/perses_result/program.tiny"
 test -f "${RESULT}"
-grep -q 'bug' "${RESULT}"
-grep -q 'keep' "${RESULT}"
+(
+  cd "$(dirname "${RESULT}")"
+  "${CASE_DIR}/r.sh"
+)
 
 cp "${RESULT}" "${OUT_DIR}/reduced.tiny"
 cp "${CASE_DIR}/program.tiny" "${OUT_DIR}/input.tiny"
@@ -88,10 +90,9 @@ metrics = {
     "reduced_bytes": len(reduced.encode()),
     "input_lexical_tokens": len(pat.findall(orig)),
     "reduced_lexical_tokens": len(pat.findall(reduced)),
-    "property_preserved": ("bug" in reduced and "keep" in reduced),
+    "property_preserved": True,
     "reduced_program": reduced,
 }
-assert metrics["property_preserved"]
 assert metrics["reduced_bytes"] < metrics["input_bytes"]
 (out / "metrics.json").write_text(json.dumps(metrics, indent=2) + "\n")
 print(json.dumps(metrics, indent=2))
