@@ -1,11 +1,12 @@
 # Yongqiang Tian paper tracker
 
-Last public-source sweep: **2026-09-12**.
+Last public-source sweep: **2026-09-13**.
 
 This file separates the discovery queue from completed reproduction directories. It intentionally includes preprints and tool demonstrations that may not yet be prominent in Scholar/DBLP so they do not get lost between daily runs.
 
 | Paper | Public status | Reproduction status |
 |---|---|---|
+| Program Reduction: A Comprehensive Survey | Preprint, Mar 2026 | ⬜ evidence/claim audit pending; survey is non-empirical |
 | LPO: Discovering Missed Peephole Optimizations with Large Language Models | ASPLOS 2026 | ✅ `papers/2026-lpo/` |
 | Unmasking the Type Inference Capabilities of LLMs for Java Code Snippets | TOSEM 2026 | ✅ `papers/2026-thaliatype/` — L1 partial |
 | Rethinking LLM-aided RTL Code Optimization Via Timing Logic Metamorphosis | TRETS 2026 on yqtian.com; public arXiv v1 is 2025 and has older authorship | ✅ `papers/2026-rtl-timing-metamorphosis/` — L0 provenance audit + scoped L2 |
@@ -35,6 +36,7 @@ This file separates the discovery queue from completed reproduction directories.
 | Pushing the Limit of 1-Minimality of Language-Agnostic Program Reduction (Vulcan) | OOPSLA 2023 | ✅ `papers/2023-vulcan/` — L0 artifact/implementation audit + scoped L2 |
 | Compilation Consistency Modulo Debug Information (CCMD / Dfusor) | ASPLOS 2023 | ✅ `papers/2023-ccmd/` — L0 artifact audit + scoped L2 |
 | PPR: Pairwise Program Reduction | ESEC/FSE 2023 | ✅ `papers/2023-ppr/` — L0 artifact audit + official current-source scoped L2 + independent scoped L2 |
+| Ad Hoc Syntax-Guided Program Reduction | ESEC/FSE 2023 Tool | ✅ `papers/2023-adhoc-perses/` — L0 source audit + official current-source scoped L2 |
 
 ## Discovery sources
 
@@ -44,12 +46,12 @@ This file separates the discovery queue from completed reproduction directories.
 - ACM/IEEE/conference publication pages
 - official artifacts and GitHub repositories
 
-## Discovery note (2026-09-12)
+## Discovery note (2026-09-13)
 
-A fresh sweep of Yongqiang Tian's publication page, Monash profile, arXiv/DBLP indexing, and targeted searches did not surface a new untracked 2026 compiler/testing/program-reduction paper that should preempt the queue. The next highest-value unfinished program-reduction paper was **PPR: Pairwise Program Reduction (ESEC/FSE 2023)**.
+A fresh sweep of Yongqiang Tian's publication page and targeted public indexing did not surface a new **empirical** 2026 compiler/testing/program-reduction paper that should preempt today's reproducible experiment. The sweep did surface **Program Reduction: A Comprehensive Survey**, a March 2026 preprint by Yongqiang Tian et al. on Chengnian Sun's publication page. Because it is a non-empirical survey rather than a paper with an experiment to rerun, it is tracked above for a separate evidence/claim audit instead of being mislabeled as an L1/L2 reproduction.
 
-PPR is now reproduced at **L0 + scoped L2**, not L1/L3. The official source and Benchmark-PPR are public in `uw-pluverse/perses`, and the paper artifact is indexed at Zenodo `10.5281/zenodo.8267114`. A fresh compile/execute pairwise-reduction probe reduced a three-change variant difference to one critical changed-statement proxy, while a separate CI lane built and ran the current official PPR implementation from pinned Perses source. Paper-scale historical results were not rerun.
+The highest-value unfinished empirical program-reduction paper was **Ad Hoc Syntax-Guided Program Reduction (ESEC/FSE 2023 Tool)**. Its current official Perses source still exposes the ad-hoc grammar installer and `--language-ext-jars` path. Today's reproduction builds that official path from a pinned current Perses commit, generates a language-support JAR for a new Tiny ANTLR grammar, and uses it in an actual reduction under a deterministic property oracle. This is **L0 + official current-source scoped L2**, not L1/L3; the historical paper-scale evaluation is not rerun.
 
 ## Next queue
 
-Re-scan 2026 first. If nothing new appears, continue backward through unfinished compiler/testing work. High-value candidates are **Ad Hoc Syntax-Guided Program Reduction (ESEC/FSE 2023 Tool)**, **Revisiting the Evaluation of Deep Learning-Based Compiler Testing (IJCAI 2023)**, and **Fuzzing Deep Learning Compilers with HirGen (ISSTA 2023)**.
+Re-scan 2026 first. If nothing new appears, audit **Program Reduction: A Comprehensive Survey (2026 preprint)** for taxonomy/source reproducibility, then continue with **Revisiting the Evaluation of Deep Learning-Based Compiler Testing (IJCAI 2023)** and **Fuzzing Deep Learning Compilers with HirGen (ISSTA 2023)**.
