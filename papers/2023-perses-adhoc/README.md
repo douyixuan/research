@@ -15,7 +15,7 @@ Perses is algorithmically language-agnostic, but historically adding a grammar r
 
 ## Reproduction level
 
-Current level: **L1 partial + scoped L2 live-minimal** once the official-current-source CI lane completes.
+Current level: **L1 partial + scoped L2 live-minimal**.
 
 - **L0**: paper, official source, current documentation, build targets, and upstream adhoc system test are identified.
 - **L1 partial**: recompute the arithmetic in Tables 1-4 from the numbers printed in the paper. This is not a rerun of the five historical compiler-bug reductions.
@@ -49,7 +49,7 @@ The checked-in `published_tables.json` transcribes Tables 1-4. `reproduce.py` on
 Two small reporting details are worth preserving rather than smoothing over:
 
 1. Table 1's listed infrastructure LOC are `89 + 3 + 67 + 33 = 192`. The abstract/contribution text describes this as roughly **190 lines**, while Section 3.2 says the four files involve **200 lines**.
-2. Directly averaging the five Table 3 rows gives a current arithmetic slowdown of **2.535%** (`1221.6 / 1191.4 - 1`). The paper reports **2.6%**, which is what one gets approximately from the displayed rounded means (`1222 / 1191 - 1 = 2.603%`). This is only rounding, not an experimental discrepancy.
+2. Directly averaging the five Table 3 rows gives an arithmetic slowdown of **2.535%** (`1221.6 / 1191.4 - 1`). The paper reports **2.6%**, which is what one gets approximately from the displayed rounded means (`1222 / 1191 - 1 = 2.603%`). This is only rounding, not an experimental discrepancy.
 
 ## Scoped L2: fresh dynamic-language probe
 
@@ -58,17 +58,19 @@ Two small reporting details are worth preserving rather than smoothing over:
 1. build `perses_adhoc_installer_deploy.jar` and `perses_deploy.jar` from official source;
 2. run the official `system_test_of_adhoc_fuzz_testing` target;
 3. compile `case/MiniExpr.g4` + `language_kind.yaml` into `mini_expr.jar` without modifying Perses;
-4. reduce a five-statement `.mini` input while preserving the property that identifier `target` remains.
+4. reduce a five-statement `.mini` input, deleting four optional `drop` statements while preserving the required `keep target;` property.
 
-The fixture is intentionally tiny. Success demonstrates the end-to-end mechanism claimed by the tool paper, not paper-scale effectiveness or efficiency.
+Current Perses enables newer transformations such as T-Rec and Latra by default, and also enables Mimir regular-node reduction. The live probe explicitly disables those three features so this tiny experiment exercises the core syntax-guided deletion path rather than accidentally crediting post-2023 transformations to the tool paper.
 
-Expected evidence is saved under `results/official/` and uploaded as the `perses-adhoc-official-l2` Actions artifact: build log, upstream system-test log, grammar-generation log, reduction log, original/reduced programs, environment metadata, and JSON summary.
+The fixture is intentionally tiny. Success demonstrates the end-to-end dynamic-language mechanism and fresh syntax-directed deletion, not paper-scale effectiveness or efficiency. Exact current timings and reduced output are recorded by CI rather than treated as comparable to the paper's historical timing table.
+
+Evidence is saved under `results/official/` and uploaded as the `perses-adhoc-official-l2` Actions artifact: build log, upstream system-test log, grammar-generation log, reduction log, original/reduced programs, environment metadata, and JSON summary.
 
 ## Paper vs reproduction
 
 | Claim | Evidence here | Status |
 |---|---|---|
-| Dynamic grammar JAR can extend Perses without source edits | Fresh `MiniExpr` grammar compiled and loaded by official current source | scoped L2, CI pending at initial commit |
+| Dynamic grammar JAR can extend Perses without source edits | Fresh `MiniExpr` grammar compiled, loaded, and reduced by pinned official current source | scoped L2 |
 | Native Perses and adhoc mode have equal final token counts on 5 historical C bugs | Printed Table 2 arithmetic only | L1 partial; no historical rerun |
 | Adhoc reduction is only ~2.6% slower on those 5 bugs | Printed Table 3 arithmetic only | L1 partial; no historical rerun |
 | Grammar-library generation costs ~10 s on six paper grammars | Printed Table 4 arithmetic only | L1 partial; fresh tiny-grammar time is recorded separately and must not be compared as equivalent |
@@ -79,7 +81,7 @@ Expected evidence is saved under `results/official/` and uploaded as the `perses
 - The L1 lane uses numbers printed in the paper, not raw historical logs.
 - The original five GCC/Clang subjects, exact paper-era Perses revision, machine, JVM, Bazel, and compiler binaries are not reconstructed here, so no paper-scale timing claim is made.
 - The L2 case is a purpose-built tiny grammar and property; it validates the dynamic-language path but cannot establish equality of effectiveness across complex real languages.
-- Current Perses has evolved since 2023. A successful current-source run demonstrates durability of the mechanism, not equivalence to the 2023 implementation.
+- Current Perses has evolved since 2023. A successful current-source run demonstrates durability of the mechanism, not equivalence to the 2023 implementation. In particular, modern default transformations are different enough that they are explicitly disabled in the scoped probe.
 - GitHub-hosted build dependencies make the live lane network-dependent; build logs and the exact Perses commit are retained in the artifact.
 
 ## Most valuable extension (L4)
