@@ -1,0 +1,53 @@
+name: paper-adhoc
+
+on:
+  push:
+    paths:
+      - 'papers/2023-adhoc/**'
+      - '.github/workflows/paper-adhoc.yml'
+  pull_request:
+    paths:
+      - 'papers/2023-adhoc/**'
+      - '.github/workflows/paper-adhoc.yml'
+  workflow_dispatch:
+
+jobs:
+  claim-audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Audit arithmetic printed in the paper
+        run: python3 papers/2023-adhoc/audit_claims.py
+      - name: Upload claim-audit evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: adhoc-paper-claim-audit
+          path: papers/2023-adhoc/results/paper-claim-audit.json
+          if-no-files-found: error
+
+  current-source-l2:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.24.x'
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Install runtime dependency
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang-format
+      - name: Run current-source ad-hoc grammar reproduction
+        run: bash papers/2023-adhoc/reproduce.sh
+      - name: Upload reproduction evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: adhoc-current-source-l2
+          path: papers/2023-adhoc/results/
+          if-no-files-found: warn
