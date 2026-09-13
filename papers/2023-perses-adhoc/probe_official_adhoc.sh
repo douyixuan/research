@@ -62,7 +62,11 @@ start_ns=$(date +%s%N)
 java -jar "${PERSES_JAR}" \
   --input-file "${CASE_DIR}/input.mini" \
   --test-script "${CASE_DIR}/r.sh" \
-  --language-ext-jars "${LANG_JAR}" 2>&1 | tee "${OUT_DIR}/reduction.log"
+  --language-ext-jars "${LANG_JAR}" \
+  --enable-trec false \
+  --enable-latra false \
+  --enable-mimir-for-regular-node false \
+  2>&1 | tee "${OUT_DIR}/reduction.log"
 end_ns=$(date +%s%N)
 reduction_ms=$(( (end_ns - start_ns) / 1000000 ))
 popd >/dev/null
@@ -70,8 +74,9 @@ popd >/dev/null
 RESULT_FILE="${CASE_DIR}/perses_result/input.mini"
 test -s "${RESULT_FILE}"
 grep -q "target" "${RESULT_FILE}"
-if grep -Eq 'alpha|beta|gamma|delta' "${RESULT_FILE}"; then
-  echo "Unexpected irrelevant statement survived reduction:" >&2
+grep -q "keep" "${RESULT_FILE}"
+if grep -q "drop" "${RESULT_FILE}"; then
+  echo "Expected all optional drop statements to be deleted:" >&2
   cat "${RESULT_FILE}" >&2
   exit 3
 fi
@@ -87,21 +92,32 @@ original = Path(sys.argv[1]).read_text()
 reduced = Path(sys.argv[2]).read_text()
 out = Path(sys.argv[3])
 pat = re.compile(r"[A-Za-z_][A-Za-z_0-9]*|;")
+original_tokens = len(pat.findall(original))
+reduced_tokens = len(pat.findall(reduced))
+original_bytes = len(original.encode())
+reduced_bytes = len(reduced.encode())
 summary = {
     "level": "scoped-L2-live-minimal",
     "perses_commit": os.environ["PERSES_COMMIT"],
     "upstream_system_test": "passed",
     "fresh_language": "MiniExpr",
+    "modern_transformations_disabled": ["T-Rec", "Latra", "Mimir regular-node"],
     "grammar_library_generation_ms": int(os.environ["GENERATION_MS"]),
     "reduction_ms": int(os.environ["REDUCTION_MS"]),
-    "original_bytes": len(original.encode()),
-    "reduced_bytes": len(reduced.encode()),
-    "original_token_proxy": len(pat.findall(original)),
-    "reduced_token_proxy": len(pat.findall(reduced)),
+    "original_bytes": original_bytes,
+    "reduced_bytes": reduced_bytes,
+    "byte_reduction_pct": 100.0 * (original_bytes - reduced_bytes) / original_bytes,
+    "original_token_proxy": original_tokens,
+    "reduced_token_proxy": reduced_tokens,
+    "token_proxy_reduction_pct": 100.0 * (original_tokens - reduced_tokens) / original_tokens,
     "property_preserved": "target" in reduced,
-    "irrelevant_identifiers_removed": not any(x in reduced for x in ["alpha", "beta", "gamma", "delta"]),
+    "drop_statements_removed": "drop" not in reduced,
     "reduced_program": reduced.strip(),
 }
+assert summary["property_preserved"]
+assert summary["drop_statements_removed"]
+assert reduced_tokens < original_tokens
+assert reduced_bytes < original_bytes
 out.write_text(json.dumps(summary, indent=2) + "\n")
 print(json.dumps(summary, indent=2))
 PY
@@ -110,6 +126,7 @@ PY
   echo "perses_commit=${PERSES_COMMIT}"
   echo "bazelisk=$(bazelisk version | head -n 1)"
   echo "java=$(java -version 2>&1 | head -n 1)"
+  echo "modern_transformations_disabled=T-Rec,Latra,Mimir-regular-node"
   echo "grammar_library_generation_ms=${generation_ms}"
   echo "reduction_ms=${reduction_ms}"
 } | tee "${OUT_DIR}/environment.txt"
