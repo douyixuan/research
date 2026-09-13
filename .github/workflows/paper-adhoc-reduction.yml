@@ -1,0 +1,31 @@
+name: paper-adhoc-reduction
+
+on:
+  push:
+    paths:
+      - 'papers/2023-adhoc-reduction/**'
+      - '.github/workflows/paper-adhoc-reduction.yml'
+  pull_request:
+    paths:
+      - 'papers/2023-adhoc-reduction/**'
+      - '.github/workflows/paper-adhoc-reduction.yml'
+  workflow_dispatch:
+
+jobs:
+  official-current-source-scoped-l2:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 55
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.24.x'
+      - name: Build official AdhocCompiler and reduce MiniCalc
+        run: bash papers/2023-adhoc-reduction/reproduce.sh
+      - name: Upload reproduction logs and results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: adhoc-reduction-reproduction
+          path: papers/2023-adhoc-reduction/results/
+          if-no-files-found: warn
