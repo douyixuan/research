@@ -1,0 +1,5 @@
+let deadA = 1;
+let target = 7;
+let deadB = 2;
+let deadC = 3;
+print target;
