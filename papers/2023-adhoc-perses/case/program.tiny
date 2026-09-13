@@ -1,0 +1,4 @@
+let noise = 1;
+let dead = 2;
+bug keep;
+let tail = 3;
