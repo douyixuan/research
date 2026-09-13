@@ -1,12 +1,15 @@
 grammar MiniExpr;
 
 program
-    : statement* EOF
+    : dropStatement? dropStatement? keepStatement dropStatement? dropStatement? EOF
     ;
 
-statement
+dropStatement
+    : DROP Identifier SEMI
+    ;
+
+keepStatement
     : KEEP Identifier SEMI
-    | DROP Identifier SEMI
     ;
 
 KEEP: 'keep';
