@@ -1,0 +1,10 @@
+---
+name: "mini_expr"
+extensions:
+  - "mini"
+defaultCodeFormatControl: "ORIG_FORMAT"
+origCodeFormatControl: "ORIG_FORMAT"
+allowedCodeFormatControl:
+  - "SINGLE_TOKEN_PER_LINE"
+  - "ORIG_FORMAT"
+  - "COMPACT_ORIG_FORMAT"
