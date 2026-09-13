@@ -46,10 +46,15 @@ test -s "${LANG_JAR}"
 
 run_start=$(date +%s)
 pushd "${CASE_DIR}" >/dev/null
+# Current Perses enables T-Rec by default. At the pinned 2026 source revision,
+# TokenCanonicalizer crashes on EOF for this generated ad-hoc grammar, so this
+# paper-mechanism probe disables that later reducer explicitly. The failure is
+# retained as toolchain-drift evidence in the first CI run documented in README.
 java -jar "${PERSES_JAR}" \
   --test-script "${CASE_DIR}/r.sh" \
   --input-file "${CASE_DIR}/program.tiny" \
-  --language-ext-jars "${LANG_JAR}" 2>&1 | tee "${OUT_DIR}/perses.log"
+  --language-ext-jars "${LANG_JAR}" \
+  --enable-trec false 2>&1 | tee "${OUT_DIR}/perses.log"
 popd >/dev/null
 run_end=$(date +%s)
 
@@ -75,6 +80,7 @@ reduced = (out / "reduced.tiny").read_text()
 metrics = {
     "perses_commit": commit,
     "reproduction_level": "official current-source scoped L2",
+    "trec_enabled": False,
     "grammar_install_wall_seconds": install_s,
     "reduction_wall_seconds": run_s,
     "language_jar_bytes": jar.stat().st_size,
@@ -97,6 +103,7 @@ PY
   echo "java=$(java -version 2>&1 | head -n 1)"
   echo "go=$(go version)"
   echo "runner=$(uname -a)"
+  echo "trec_enabled=false"
 } > "${OUT_DIR}/environment.txt"
 
 cat "${OUT_DIR}/metrics.json"
