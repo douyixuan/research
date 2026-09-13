@@ -1,0 +1,31 @@
+name: paper-adhoc-perses
+
+on:
+  push:
+    paths:
+      - 'papers/2023-adhoc-perses/**'
+      - '.github/workflows/paper-adhoc-perses.yml'
+  pull_request:
+    paths:
+      - 'papers/2023-adhoc-perses/**'
+      - '.github/workflows/paper-adhoc-perses.yml'
+  workflow_dispatch:
+
+jobs:
+  official-current-source-scoped-l2:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.24.x'
+      - name: Build current Perses, install Tiny grammar, and reduce input
+        run: bash papers/2023-adhoc-perses/reproduce.sh
+      - name: Upload reproduction evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: adhoc-perses-reproduction
+          path: papers/2023-adhoc-perses/results/official/
+          if-no-files-found: warn
