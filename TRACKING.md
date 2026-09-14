@@ -35,7 +35,7 @@ This file separates the discovery queue from completed reproduction directories.
 | Pushing the Limit of 1-Minimality of Language-Agnostic Program Reduction (Vulcan) | OOPSLA 2023 | ✅ `papers/2023-vulcan/` — L0 artifact/implementation audit + scoped L2 |
 | Compilation Consistency Modulo Debug Information (CCMD / Dfusor) | ASPLOS 2023 | ✅ `papers/2023-ccmd/` — L0 artifact audit + scoped L2 |
 | PPR: Pairwise Program Reduction | ESEC/FSE 2023 | ✅ `papers/2023-ppr/` — L0 artifact audit + official current-source scoped L2 + independent scoped L2 |
-| Ad Hoc Syntax-Guided Program Reduction | ESEC/FSE 2023 Tool | `papers/2023-adhoc-perses/` — L0 implementation audit + official current-source scoped L2 lane |
+| Ad Hoc Syntax-Guided Program Reduction | ESEC/FSE 2023 Tool | ✅ `papers/2023-adhoc-perses/` — L0 implementation audit + official current-source scoped L2 |
 
 ## Discovery sources
 
