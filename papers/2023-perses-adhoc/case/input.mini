@@ -1,0 +1,5 @@
+drop alpha;
+drop beta;
+keep target;
+drop gamma;
+drop delta;

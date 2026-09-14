@@ -1,0 +1,30 @@
+{
+  "table1_glsl_infrastructure_lines": {
+    "PnfGlslParserFacade.java": 89,
+    "SingleParserFacadeFactory.kt": 3,
+    "Bazel Build Files": 67,
+    "LanguageGLSL.kt": 33
+  },
+  "table2_effectiveness": [
+    {"subject": "clang-23353", "property": "Crash", "original_tokens": 30196, "perses_tokens": 98, "adhoc_tokens": 98},
+    {"subject": "clang-22382", "property": "Crash", "original_tokens": 21068, "perses_tokens": 144, "adhoc_tokens": 144},
+    {"subject": "gcc-65383", "property": "Miscompile", "original_tokens": 43942, "perses_tokens": 153, "adhoc_tokens": 153},
+    {"subject": "gcc-66186", "property": "Miscompile", "original_tokens": 47481, "perses_tokens": 328, "adhoc_tokens": 328},
+    {"subject": "gcc-71626", "property": "Crash", "original_tokens": 6133, "perses_tokens": 51, "adhoc_tokens": 51}
+  ],
+  "table3_efficiency": [
+    {"subject": "clang-23353", "perses_time_s": 917, "perses_speed_tok_s": 32.82, "adhoc_time_s": 926, "adhoc_speed_tok_s": 32.50},
+    {"subject": "clang-22382", "perses_time_s": 756, "perses_speed_tok_s": 27.67, "adhoc_time_s": 789, "adhoc_speed_tok_s": 26.51},
+    {"subject": "gcc-65383", "perses_time_s": 1527, "perses_speed_tok_s": 28.68, "adhoc_time_s": 1725, "adhoc_speed_tok_s": 25.38},
+    {"subject": "gcc-66186", "perses_time_s": 2701, "perses_speed_tok_s": 17.46, "adhoc_time_s": 2611, "adhoc_speed_tok_s": 18.05},
+    {"subject": "gcc-71626", "perses_time_s": 56, "perses_speed_tok_s": 108.61, "adhoc_time_s": 57, "adhoc_speed_tok_s": 106.70}
+  ],
+  "table4_grammar_generation": [
+    {"language": "JSON", "non_blank_lines": 55, "time_s": 2.483},
+    {"language": "C", "non_blank_lines": 810, "time_s": 8.679},
+    {"language": "Scala", "non_blank_lines": 1160, "time_s": 8.684},
+    {"language": "Rust", "non_blank_lines": 1830, "time_s": 14.356},
+    {"language": "C++", "non_blank_lines": 872, "time_s": 14.648},
+    {"language": "Java", "non_blank_lines": 1475, "time_s": 15.672}
+  ]
+}

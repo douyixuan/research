@@ -1,0 +1,45 @@
+name: paper-perses-adhoc
+
+on:
+  push:
+    paths:
+      - 'papers/2023-perses-adhoc/**'
+      - '.github/workflows/paper-perses-adhoc.yml'
+  pull_request:
+    paths:
+      - 'papers/2023-perses-adhoc/**'
+      - '.github/workflows/paper-perses-adhoc.yml'
+  workflow_dispatch:
+
+jobs:
+  l1-table-recalculation:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Recalculate published tables
+        run: bash papers/2023-perses-adhoc/reproduce.sh
+      - name: Upload L1 evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: perses-adhoc-l1
+          path: papers/2023-perses-adhoc/results/
+          if-no-files-found: error
+
+  official-current-source-l2:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.24.x'
+      - name: Build current official Perses and run fresh adhoc language probe
+        run: bash papers/2023-perses-adhoc/probe_official_adhoc.sh
+      - name: Upload official live evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: perses-adhoc-official-l2
+          path: papers/2023-perses-adhoc/results/official/
+          if-no-files-found: warn
